@@ -65,14 +65,26 @@ Usage:
 Flags:
     -i or --interactive  Starts program in interactive mode. TRY IT(!)
 
-    -s or --silent       Do not display any text. Will not work in interactive mode.
-          --debug        Show verbose debug output
-          --raise        Process throws all exceptions it caught
-          --no-color     No colored output
     -c <connection string>  or  --connection <connection string>
                          Set connection string to server
 
     --mysql-pwd          Ask for MySQL password before connecting to database
+
+    Debug helping flags:
+    
+    -s or --silent       Do not display any text. Will not work in interactive mode.
+    --debug              Show verbose debug output          
+    --errors-silent      (default) Print errors and return non 0 code but don't raise python exceptions (*)
+    --errors-raise       Throws all python exceptions it caught and hard crashes (*)
+    --raise              (deprecated) same as --errors-raise
+    --no-color           No colored output
+    
+    * - By default CCDB throws all python exceptions in non interactive mode. But only print in console and continue 
+    in interactive mode (I.e. works as --errors-raise in non interactive and --errors-silent in interactive (-i) mode)
+    If --errors-silent is given in non interactive mode, process just prints exceptions and returns non 0 exit code 
+    
+          
+
                          """
     enveron_text = """     
 Environment:

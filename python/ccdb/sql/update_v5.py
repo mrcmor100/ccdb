@@ -104,8 +104,9 @@ def update_v5(engine, queries=None):
             schema_version = schema_version_result.scalar()
 
             if schema_version != 4:
-                raise ValueError(f"Current schema version='{schema_version}' is not 4. "
-                                 f"Only schema v4 can be updated to v5")
+                wrong_schema_message = f"Current schema version='{schema_version}' is not 4. "\
+                          "Only schema v4 can be updated to v5"
+                raise ValueError(wrong_schema_message)
 
             # If version is 4, proceed with updates
             for query in queries:

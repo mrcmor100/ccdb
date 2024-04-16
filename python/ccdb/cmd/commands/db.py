@@ -100,7 +100,7 @@ class Database(CliCommandBase):
                 log.info("This command removes DB tables and recreates them. ALL DATA IS LOST")
                 log.info("Add --init-i-am-sure flag to this command to really execute")
             else:
-                self.db_init()
+                return self.db_init()
         elif result.sub_command == 'update':
             log.info("There is no 'update' command. Did you meant 'upgrade'?")
         elif result.sub_command == 'upgrade':
@@ -109,13 +109,13 @@ class Database(CliCommandBase):
                 log.info("This command tries to upgrade DB structure to current version")
                 log.info("Add --upgrade-i-am-sure flag to this command to really execute")
             else:
-                self.db_upgrade()
+                return self.db_upgrade()
         elif result.sub_command == 'stats':
-            self.db_stats()
+            return self.db_stats()
         else:
             if result.sub_command:
                 log.info(f"There is no '{result.sub_command}' command.")
-            self.db_base_info()
+            return self.db_base_info()
 
     def db_init(self):
         log.debug(f" |- Initializing database : '{self.context.connection_string}'")
@@ -124,6 +124,7 @@ class Database(CliCommandBase):
         provider.connect(connection_string=self.context.connection_string, check_version=False)
         init_mysql_database(provider.engine)
         log.debug(f" |- Done DB init")
+        return True
 
     def db_upgrade(self):
         log.debug(f" |- Upgrading database : '{self.context.connection_string}'")
@@ -132,12 +133,19 @@ class Database(CliCommandBase):
         provider.connect(connection_string=self.context.connection_string, check_version=False)
         update_v5(provider.engine)
         log.debug(f" |- Done DB upgrade")
+        return True
 
     def db_stats(self):
         provider = self.context.provider
         assert isinstance(provider, AlchemyProvider)
+        provider.connect(self.context.connection_string, True)
         asgm_count = provider.session.query(Assignment).count()
         print(f"Num assignments: {asgm_count}")
+
+        constant_set_count = provider.session.query(ccdb.ConstantSet).count()
+        print(f"Num constant sets: {constant_set_count}")
+
+        return True
 
     def db_base_info(self):
         provider = self.context.provider
@@ -147,6 +155,7 @@ class Database(CliCommandBase):
         assert isinstance(version, CcdbSchemaVersion)
         print(f"Connection to: {self.context.connection_string}")
         print(f"Schema version: {version.version}")
+        return True
 
     def print_help(self):
         """Prints help of the command"""

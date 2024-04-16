@@ -7,7 +7,7 @@ import shlex
 import ccdb.cmd.colorama
 import ccdb.path_utils
 import ccdb.cmd.themes
-from ccdb.cmd.cli_manager import CliManager
+from ccdb.cmd.cli_manager import CliManager, CCDB_EXCEPTIONS_THROW
 
 try:
     from . import helper
@@ -32,14 +32,12 @@ class AddThenDumpFileTests(unittest.TestCase):
 
         # create console context
         self.context = CliManager()
-        self.context.silent_exceptions = False
+        self.context.exception_handling = CCDB_EXCEPTIONS_THROW
         self.context.theme = ccdb.cmd.themes.NoColorTheme()
         self.context.connection_string = self.sqlite_connection_str
         self.context.user_name = "python_tests"
         self.context.register_utilities()
         self.context.provider.authentication.current_user_name = "test_user"
-
-
 
         # logger
         ch = logging.StreamHandler()

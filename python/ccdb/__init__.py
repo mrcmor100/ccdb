@@ -69,7 +69,7 @@ from .table_file import TextFileDOM, read_ccdb_text_file, read_namevalue_text_fi
 from .cmd.themes import NoColorTheme, ColoredTheme
 from .brace_log_message import BraceMessage
 from .cmd import themes
-
+from ccdb.cmd.cli_manager import CCDB_EXCEPTIONS_THROW, CCDB_EXCEPTIONS_SILENT
 
 # the default ccdb logger
 logger = logging.getLogger("ccdb")
@@ -126,10 +126,19 @@ def init_ccdb_console():
         logger.setLevel(logging.DEBUG)
         logger.debug("debugging verbose mode is " + context.theme.Ok + " ON " + context.theme.Reset)
 
-    if "--raise" in sys.argv:
-        logger.debug("--raise flag found. The process will raise exceptions thrown by commands"
+    if "--raise" in sys.argv or "--errors-raise" in sys.argv:
+        if "--raise" in sys.argv:
+            logger.info("Flag --raise is deprecated. Please use --errors-raise instead")
+        logger.debug("--errors-raise flag. The process will raise python exceptions thrown by commands"
                      " instead of humble notifications and non 0 return result")
-        context.silent_exceptions = False
+        context.exception_handling = CCDB_EXCEPTIONS_THROW
+
+    if "--errors-silent" in sys.argv:
+        logger.debug("--errors-silent flag. Print errors and return non 0 code but don't raise python exceptions")
+        context.exception_handling = CCDB_EXCEPTIONS_SILENT
+
+
+
 
     # CONNECTION STRING
     # ------------------------------

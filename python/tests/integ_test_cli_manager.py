@@ -45,7 +45,8 @@ class CliManagerTests(unittest.TestCase):
 
         # create console context
         self.cli = CliManager()
-        self.cli.silent_exceptions = False
+        self.cli.exception_handling = CCDB_EXCEPTIONS_THROW
+        self.cli.force_exceptions = True
         self.cli.theme = ccdb.cmd.themes.NoColorTheme()
         self.cli.connection_string = self.sqlite_connection_str
         self.cli.context.user_name = "test_user"

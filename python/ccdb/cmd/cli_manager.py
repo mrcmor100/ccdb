@@ -17,7 +17,9 @@ from .cli_context import CliContext
 from . import themes
 from . import colorama
 
-
+CCDB_EXCEPTIONS_THROW = "throw"       # Rethrow all exceptions
+CCDB_EXCEPTIONS_SILENT = "print"    # Print exceptions but not rethrow them
+CCDB_EXCEPTIONS_AUTO = "auto"       # Rethrow in non-interactive mode, only print if 'ccdb -i' mode
 
 log = logging.getLogger("ccdb.cmd.console_context")
 
@@ -50,10 +52,16 @@ class CliManager(object):
         self._prov = AlchemyProvider()
         self._commands = {}
         self._ls = None
-        self.silent_exceptions = True  # rethrow happened exceptions
+        self.exception_handling = CCDB_EXCEPTIONS_SILENT  # rethrow happened exceptions
         self.log_sqlite = False
         self.context = CliContext(self._prov, themes.NoColorTheme(), self._commands)
         self.matching_words = []
+
+    @property
+    def is_silent_exceptions(self):
+        return ((self.exception_handling == CCDB_EXCEPTIONS_SILENT)
+                or
+                (self.exception_handling == CCDB_EXCEPTIONS_AUTO) and self.context.is_interactive)
 
     @property
     def utils(self):
@@ -154,6 +162,7 @@ class CliManager(object):
                 elif token == "-I" or token == "-i" or token == "--interactive":
                     self.context.is_interactive = True
 
+
                 # working run
                 elif token == "-r" or token == "--run":
                     # working run
@@ -187,7 +196,7 @@ class CliManager(object):
                     return self.process_command(command, command_args)
                 except Exception as ex:
                     log.error(ex)
-                    if self.silent_exceptions:
+                    if self.is_silent_exceptions:
                         return None
                     else:
                         raise
@@ -248,7 +257,7 @@ class CliManager(object):
             command = self._commands[cmd_name]
         except KeyError:
             log.error("Command " + cmd_name + " is unknown! Please, use help to see available commands")
-            if self.silent_exceptions:
+            if self.is_silent_exceptions:
                 return None
             else:
                 raise
@@ -276,7 +285,7 @@ class CliManager(object):
                 redir_file = open(redir_fname, 'w')
             except Exception as ex:
                 log.error("Cannot open file '{0}' {1} ".format(redir_fname, ex))
-                if self.silent_exceptions:
+                if self.is_silent_exceptions:
                     return None
                 else:
                     raise
@@ -294,8 +303,8 @@ class CliManager(object):
                 result = self.process_command_line(result)
 
         except Exception as ex:
-            log.info(ex)
-            if self.silent_exceptions:
+            log.warning(ex)
+            if self.is_silent_exceptions:
                 return None
             else:
                 raise
