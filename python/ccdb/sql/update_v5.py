@@ -38,7 +38,8 @@ mysql_update_v5_queries = [
       `runMax` INT NOT NULL,
       `assignmentTime` TIMESTAMP NOT NULL,
       PRIMARY KEY (`id`));
-    
+    """,
+    """
     UPDATE `schemaVersions` SET schemaVersion = 5 WHERE `id` = 1;
     """,
 ]
@@ -86,7 +87,7 @@ def update_v5(engine, queries=None):
     :param queries: List of SQL queries to be executed.
     """
 
-    connection_string = engine.url
+    connection_string = str(engine.url)
     if not queries:
         if 'mysql' in connection_string or 'mariadb' in connection_string:
             queries = mysql_update_v5_queries
