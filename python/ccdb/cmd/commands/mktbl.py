@@ -255,6 +255,10 @@ class MakeTable(CliCommandBase):
                 pass
 
         if m.group("type"):
+            column_type = m.group("type")
+            if column_type not in ['int', 'double', 'string']:
+                raise ValueError(f"Column type is not supported. Provided: '{column_type}'. "
+                                 f"Allowed: 'int', 'double', 'string'")
             result["type"] = m.group("type")
 
         if result["type"] is None:
