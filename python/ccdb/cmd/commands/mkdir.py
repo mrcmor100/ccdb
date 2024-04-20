@@ -59,3 +59,12 @@ class MakeDirectory(CliCommandBase):
         except Exception as ex:
             log.warning(self.theme.Fail+"Failed"+self.theme.Reset+" to create directory. Exception message: {0}".format(ex))
             raise
+
+    def print_help(self):
+        """prints help for MakeDirectory"""
+
+        print(r"""
+MakeDirectory or mkdir creates directory in CCDB database
+Example: 
+    mktbl /test/my_test_dir # comment for the directory
+        """)
