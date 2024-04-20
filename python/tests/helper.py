@@ -7,6 +7,9 @@ import subprocess
 from contextlib import contextmanager
 from six import StringIO
 
+from ccdb import CCDB_EXCEPTIONS_THROW
+from ccdb.cmd import CliManager
+
 # path to CCDB_HOME
 ccdb_path = ccdb.get_ccdb_home_path()
 
@@ -27,30 +30,28 @@ else:
         mysql_test_connection_str = "mysql://ccdb_user@localhost/ccdb_test"
 
 
+# SQLite connection string for tests
 sqlite_test_file_path = os.path.join(os.getcwd(), 'test.sqlite')
 
 # SQLite connection string for tests
-sqlite_test_connection_str = "sqlite:///" + os.path.join(os.getcwd(), 'test.sqlite')
+sqlite_test_connection_str = "sqlite:///" + os.path.join(ccdb_path, 'sql', 'ccdb.sqlite')
 
-
-def recreate_mysql_db(username="ccdb_user", password=""):
+def recreate_mysql_db(connection_str):
     """ Erases the test database and put it to default conditions """
 
-    cmdline = ["mysql", "-u", username]
-    if password:
-        cmdline.extend(["-p", password])
+    # create console context
+    cli = CliManager()
+    cli.exception_handling = CCDB_EXCEPTIONS_THROW
+    cli.force_exceptions = True
+    cli.theme = ccdb.cmd.themes.NoColorTheme()
+    cli.connection_string = connection_str
+    cli.context.user_name = "test_user"
+    cli.register_utilities()
+    cli.process_command_line("db init --init-i-am-sure")
 
-    mysql_source_path = os.path.join(ccdb_path, 'sql', 'ccdb.mysql.sql')
-    with open(mysql_source_path, 'r') as content_file:
-        mysql_query = content_file.read()
 
-    mysql_query = mysql_query.replace("`ccdb`", "`ccdb_test`")
 
-    p = subprocess.Popen(cmdline, stdin=subprocess.PIPE, encoding='utf8')
-    p.communicate(mysql_query)
-    ret_code = p.wait()
 
-    print("MySQL recreation ended with the return code:", ret_code)
 
 def recreate_mysql_db2(connection_string='mysql+pymysql://ccdb_user@localhost/ccdb_test'):
     from sqlalchemy import create_engine, text

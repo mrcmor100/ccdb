@@ -21,7 +21,7 @@ class MySQLAlchemyProviderTest(provider_fixture.AlchemyProviderTest):
 
         if not MySQLAlchemyProviderTest.mysql_is_recreated:
             MySQLAlchemyProviderTest.mysql_is_recreated = True
-            helper.recreate_mysql_db()
+            helper.recreate_mysql_db(helper.mysql_test_connection_str)
 
     def setUp(self):
         super(MySQLAlchemyProviderTest, self).setUp()

@@ -14,7 +14,7 @@ import ccdb.cmd.colorama
 from ccdb.errors import ObjectIsNotFoundInDbError
 import ccdb.path_utils
 import ccdb.cmd.themes
-from ccdb.cmd.cli_manager import CliManager
+from ccdb.cmd.cli_manager import CliManager, CCDB_EXCEPTIONS_THROW
 try:
     from . import helper
 except:

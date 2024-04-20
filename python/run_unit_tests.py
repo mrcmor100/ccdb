@@ -33,5 +33,6 @@ def run_unit_tests():
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-    os.chdir(script_dir)
+    unit_test_dir = os.path.join(script_dir, "tests")
+    os.chdir(unit_test_dir)
     run_unit_tests()
