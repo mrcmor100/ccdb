@@ -20,7 +20,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import desc
 from .model import Directory, TypeTable, TypeTableColumn, ConstantSet, Assignment, RunRange, Variation, User, LogRecord
 from .errors import ObjectIsNotFoundInDbError, AnonymousUserForbiddenError, DatabaseStructureError, UserNotFoundError, \
-    UserExistsError, MissingArgumentError, AllowDefaultsError
+    UserExistsError
 
 from .table_file import TextFileDOM
 from .authentication import Authentication
@@ -1156,9 +1156,9 @@ class AlchemyProvider(object):
             request = parse_request(request)
         assert isinstance(request, ParseRequestResult)
         if not allow_defaults and (default_variation or default_run or default_time):
-            raise AllowDefaultsError
+            raise ValueError("allow_defaults is not set to true but other fields are")
         if allow_defaults and not (default_time or default_run or default_variation):
-            raise MissingArgumentError
+            raise ValueError("allow_defaults is true and default_time or default_run or default_variation is missing")
         if default_variation == '' and request.variation == '':
             request.variation = "default"
 

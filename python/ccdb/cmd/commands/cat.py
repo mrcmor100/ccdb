@@ -5,7 +5,6 @@ import os
 from ccdb import TypeTable, Assignment
 from ccdb import AlchemyProvider
 from ccdb.cmd import CliCommandBase, UtilityArgumentParser
-from ccdb.errors import MissingArgumentError
 from ccdb.path_utils import ParseRequestResult, parse_request
 from ccdb import BraceMessage as Lfm  # lfm is aka log format message. See BraceMessage desc about
 from sqlalchemy.orm.exc import NoResultFound

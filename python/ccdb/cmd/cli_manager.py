@@ -158,6 +158,11 @@ class CliManager(object):
                     self.context.connection_string = workargs[i]
                     i += 1
 
+                    # connection string
+                if (token == "-u" or token == "--user") and (i < len(workargs)):
+                    self.context.user_name = workargs[i]
+                    i += 1
+
                 # it is an interactive mode
                 elif token == "-I" or token == "-i" or token == "--interactive":
                     self.context.is_interactive = True
