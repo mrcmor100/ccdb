@@ -137,9 +137,6 @@ def init_ccdb_console():
         logger.debug("--errors-silent flag. Print errors and return non 0 code but don't raise python exceptions")
         context.exception_handling = CCDB_EXCEPTIONS_SILENT
 
-
-
-
     # CONNECTION STRING
     # ------------------------------
 

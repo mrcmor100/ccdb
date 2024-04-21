@@ -95,6 +95,17 @@ class CliManager(object):
         log.debug(lfm(" |- theme(value) {0} | \\{0} |  |- theme switched to : '{1}'", os.linesep, value))
         self.context.theme = value
 
+    @property
+    def user_name(self):
+        """":rtype: str"""
+        return self.context.user_name
+
+    @user_name.setter
+    def user_name(self, value):
+        self.context.user_name = value
+
+
+
     # =====================================================================================
     # ------------------ C O M M A N D S   M A N A G E M E N T  ---------------------------
     # =====================================================================================
