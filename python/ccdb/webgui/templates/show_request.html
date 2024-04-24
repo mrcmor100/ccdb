@@ -1,46 +1,58 @@
 {% extends 'simple_base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Show request{% endblock %}</h1>
+  <h1 class="text-center my-4">{% block title %}Show Request{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
+<div class="container mt-3">
+    <h2>Request: <small>{{ user_request_str }}</small></h2>
+    <div class="card mb-3">
+        <div class="card-body">
+            <h3 class="card-title">Constants Information:</h3>
+            <table class="table">
+                <tbody>
+                    <tr><th scope="row">Table</th><td><a href="{{ url_for('versions', table_path=assignment.constant_set.type_table.path) }}" title="See all data for the table">[{{ assignment.constant_set.type_table.path }}]</a></td></tr>
+                    <tr><th scope="row">Variation</th><td>{{ variation }}</td></tr>
+                    <tr><th scope="row">Created</th><td>{{ created }}</td></tr>
+                    <tr><th scope="row">Run Range</th><td>{{ run_range }}</td></tr>
+                    <tr><th scope="row">Author</th><td>{{ author }}</td></tr>
+                    <tr><th scope="row">Exact ID</th><td>{{ assignment.request }}</td></tr>
+                </tbody>
+            </table>
+            <a href="{{ url_for('download_request', request=assignment.request) }}" target="_blank" class="btn btn-primary">Download Text Data</a>
+        </div>
+    </div>
 
-<h2>Request: &nbsp; &nbsp; {{ user_request_str }}</h2>
+    <div>
+        <h3>Comment:</h3>
+        <p>{{ comment | safe }}</p>
+    </div>
 
-
-    <h3>Constants information:</h3>
-    <table class="dataInfoTable">
-        <tr><td>Table        </td>  <td class="paddedItem"><a href="{{ url_for('versions', table_path=assignment.constant_set.type_table.path) }}" title="See all data for the table">[{{ assignment.constant_set.type_table.path }}]</a></td></tr>
-        <tr><td>Variation    </td>  <td class="paddedItem">{{ variation }}</td></tr>
-        <tr><td>Created      </td>  <td class="paddedItem">{{ created }}</td></tr>
-        <tr><td>Run range    </td>  <td class="paddedItem">{{ run_range }}</td></tr>
-        <tr><td>Author       </td>  <td class="paddedItem">{{ author }}</td></tr>
-        <tr><td>Exact id     </td>  <td class="paddedItem">{{ assignment.request }}</td></tr>
-    </table>
-    <a href="{{ url_for('download_request', request=assignment.request) }}" target="_blank">[Download text data]</a>
-
-    <p></p>
-    <h3>Comment:</h3>
-    <p>{{ comment }}</p>
-
-    <h3>Data:</h3>
-    <table id="data_table" class="data_versions">
-        <thead>
-            <tr>
-                {% for column in assignment.constant_set.type_table.columns %}
-                    <th>{{ column.name }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in assignment.constant_set.data_table %}
-                <tr>
-                    {% for cell in row %}
-                        <td>{{ cell }}</td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="card">
+        <div class="card-body">
+            <h3 class="card-title">Data:</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            {% for column in assignment.constant_set.type_table.columns %}
+                                <th>{{ column.name }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in assignment.constant_set.data_table %}
+                            <tr>
+                                {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

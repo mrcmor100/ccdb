@@ -1,36 +1,39 @@
 {% extends 'simple_base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Versions{% endblock %}</h1>
+<h1 class="text-center mt-4">{% block title %}Versions{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
-
-     <table style="border: 1px solid;">
-         <tr>
-            <th colspan="2">Run</th>
-            <th rowspan="2">Created</th>
-            <th rowspan="2">Variation</th>
-            <th rowspan="2">Actions</th>
-        </tr>
-        <tr>
-            <th>min</th>
-            <th>max</th>
-        </tr>
-
-         {{ table_path }}
-     <!-- -->
-
-     {% for assignment in assignments %}
-        <tr>
-            <td>{{ assignment.run_range.min }}</td>
-            <td>{{ assignment.run_range.max }}</td>
-            <td>{{ assignment.created }}</td>
-            <td>{{ assignment.variation.name }}</td>
-            <td><a href='show_request?request=@assignment.request'>view</a></td>
-        </tr>
-    {% endfor %}
-
-</table>
-
+<div class="container mt-4">
+    <h2>{{ table_path }}</h2>
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>Run Min</th>
+                    <th>Run Max</th>
+                    <th>Created</th>
+                    <th>Variation</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in assignments %}
+                <tr>
+                    <td>{{ assignment.run_range.min }}</td>
+                    <td>{{ assignment.run_range.max }}</td>
+                    <td>{{ assignment.created }}</td>
+                    <td>{{ assignment.variation.name }}</td>
+                    <td><a href="{{ url_for('show_request', request=assignment.request) }}" class="btn btn-primary btn-sm">view</a></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">No assignments found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

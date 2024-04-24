@@ -1,7 +1,7 @@
 import cgi
 import os
 
-from flask import Flask, g, render_template
+from flask import Flask, g, render_template, url_for, request
 
 import ccdb
 from ccdb import provider
@@ -31,22 +31,35 @@ def dir_to_ul(directory, level=0):
     if not len(directory.sub_dirs) and not len(directory.type_tables):
         return ""
 
-    spaces = level * "  "
-    result = f"{spaces}<!-- {directory.name} -->\n" \
-             f"{spaces}<ul>\n"
+    indent = "    " * level
+    result = f'{indent}<ul class="list-group">\n'
 
-    # print subdirectories
+    # Print subdirectories
     for sub_dir in directory.sub_dirs:
-        result += f'{spaces}  <li> <strong>{directory.name}</strong> \n' \
-                  f'{dir_to_ul(sub_dir, level + 1)} \n' \
-                  f'{spaces}  </li>\n'
+        has_children = sub_dir.sub_dirs or sub_dir.type_tables
+        collapse_id = f"collapse{sub_dir.id}"
+        result += f'{indent}<li class="list-group-item">\n'
+        if has_children:
+            result += (
+                f'{indent}<a href="#{collapse_id}" data-bs-toggle="collapse" '
+                f'class="d-flex justify-content-between align-items-center">\n'
+                f'{indent}<span>{sub_dir.name}</span>\n'
+                f'{indent}<i class="bi bi-chevron-down ms-auto"></i>\n'
+                f'{indent}</a>\n'
+                f'{indent}<div id="{collapse_id}" class="collapse">\n'
+                f'{dir_to_ul(sub_dir, level + 1)}\n'
+                f'{indent}</div>\n'
+            )
+        else:
+            result += f'{indent}{sub_dir.name}\n'
+        result += f'{indent}</li>\n'
 
-    # print type tables
+    # Print type tables
     for table in directory.type_tables:
-        result += f'{spaces}  <li> {table.name} </li> \n'
+        table_url = url_for('versions', table_path=table.path)
+        result += f'{indent}<li class="list-group-item"><a href="{table_url}">{table.name}</a></li>\n'
 
-    # close
-    result += f"{spaces}</ul>\n"
+    result += f'{indent}</ul>\n'
     return result
 
 
@@ -102,6 +115,7 @@ def cerate_ccdb_flask_app(test_config=None):
     def simple():
         return render_template("simple.html")
 
+
     @app.route('/tree')
     def directory_tree():
         # Get ccdb Alchemy provider from flask global state 'g'
@@ -116,7 +130,7 @@ def cerate_ccdb_flask_app(test_config=None):
         return render_template("simple_tree.html", html_tree=html_tree)
 
     @app.route('/vars')
-    def variations_test():
+    def variations():
         # Get ccdb Alchemy provider from flask global state 'g'
         db: ccdb.AlchemyProvider = g.db
 
@@ -129,7 +143,7 @@ def cerate_ccdb_flask_app(test_config=None):
         # Get ccdb Alchemy provider from flask global state 'g'
         db: ccdb.AlchemyProvider = g.db
 
-        records = db.get_log_records(100)
+        records = db.get_log_records(1000)
 
         return render_template("simple_logs.html", records=records)
 
@@ -180,6 +194,7 @@ def cerate_ccdb_flask_app(test_config=None):
         comment = ""
 
         # get request from web form
+
         # str_request = "/test/test_vars/test_table:0:default:2012-10-30_23-48-41"
 
         # parse request and prepare time

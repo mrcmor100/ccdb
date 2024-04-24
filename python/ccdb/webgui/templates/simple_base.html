@@ -1,21 +1,69 @@
 <!doctype html>
 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CCDB Web GUI{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Начало Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">CCDB Web GUI</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('directory_tree') }}">Tables</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('variations') }}">Variations</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('log_records') }}">Request</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('log_records') }}">Logs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@site_cgi_root/doc">Documentation</a>
+                    </li>
+                </ul>
+                <form class="d-flex" method="get" action="http://www.google.com/search">
+                    <input class="form-control me-2" type="search" placeholder="Search via google" name="q" aria-label="Search">
+                    <input type="hidden" name="sitesearch" value="@site_url" />
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    <!-- Конец Navbar -->
 
-<title>{% block title %}CCDB Web GUI{% endblock %}</title>
+    <section class="container mt-4">
+        <header>
+            {% block header %}{% endblock %}
+        </header>
+        {% for message in get_flashed_messages() %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endfor %}
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        {% block content %}{% endblock %}
+    </section>
 
-<nav>
-  <h1><a href="{{ url_for('index') }}">Index</a></h1>
-</nav>
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container">
+            <span class="text-muted">{% block footer %}CCDB Calibration and Conditions database. <a href="https://halldweb1.jlab.org/mantisbt/bug_report_page.php">Report a bug</a>{% endblock %}</span>
+        </div>
+    </footer>
 
-<section class="content">
-  <header>
-    {% block header %}{% endblock %}
-  </header>
-  {% for message in get_flashed_messages() %}
-    <div class="flash">{{ message }}</div>
-  {% endfor %}
-
-  {% block content %}{% endblock %}
-</section>
+    {% block additional_scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% endblock %}
+</body>
+</html>

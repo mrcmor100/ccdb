@@ -1,19 +1,13 @@
 {% extends 'simple_base.html' %}
 
 {% block header %}
-  <h1>{% block title %}List of directories{% endblock %}</h1>
+<h1 class="text-center my-4">{% block title %}List of directories{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
-
-    <p> Simple directories tree </p>
-
-    {% autoescape false %}
-    {{ html_tree }}
-    {% endautoescape %}
-
-
-
-
-
+<div class="container mt-3">
+  <div id="directory-tree" class="row">
+    {{ html_tree | safe }}
+  </div>
+</div>
 {% endblock %}
