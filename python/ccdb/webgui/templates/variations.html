@@ -1,4 +1,4 @@
-{% extends 'simple_base.html' %}
+{% extends 'dash_base.html' %}
 
 {% block header %}
   <h1 class="mt-4 mb-4 text-center">{% block title %}Variations{% endblock %}</h1>
@@ -11,11 +11,8 @@
 
 
         <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css" />
-
-        <p> Variations </p>
-
         <table id="variationsTable" class="table table-striped table-bordered" style="width:100%">
-          <thead>
+          <thead class="thead-dark">
             <tr>
               <th>Name</th>
               <th>Created</th>

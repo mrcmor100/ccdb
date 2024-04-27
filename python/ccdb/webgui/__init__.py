@@ -1,12 +1,9 @@
-import cgi
-import os
-
-from flask import Flask, g, render_template, url_for, request
-
 import ccdb
-from ccdb import provider
 from ccdb.model import User
 from ccdb.path_utils import parse_request, ParseRequestResult
+from flask import Flask, g, render_template, url_for
+
+from python.ccdb.errors import ObjectIsNotFoundInDbError
 
 
 def print_app_functions(app):
@@ -19,6 +16,27 @@ def print_app_functions(app):
     print()
 
 
+def render_dir_info(directory):
+    """
+    Render HTML for directory information using Flask and Jinja2.
+
+    :param directory: Directory object
+    :type directory: ccdb.model.Directory
+    """
+
+    return render_template('objects_dir_info.html', dir=directory)
+
+
+def render_table_info(table):
+    """
+    Render HTML for table information using Flask and Jinja2.
+
+    :param table: Table object
+    :type table: ccdb.TypeTable
+    """
+    return render_template('objects_table_info.html', table=table)
+
+
 def dir_to_ul(directory, level=0):
     """
     :param directory: Directory
@@ -29,37 +47,19 @@ def dir_to_ul(directory, level=0):
     """
 
     if not len(directory.sub_dirs) and not len(directory.type_tables):
-        return ""
+        return "<ul></ul>"
 
-    indent = "    " * level
-    result = f'{indent}<ul class="list-group">\n'
-
-    # Print subdirectories
+    result = '<ul>\n'
     for sub_dir in directory.sub_dirs:
-        has_children = sub_dir.sub_dirs or sub_dir.type_tables
-        collapse_id = f"collapse{sub_dir.id}"
-        result += f'{indent}<li class="list-group-item">\n'
-        if has_children:
-            result += (
-                f'{indent}<a href="#{collapse_id}" data-bs-toggle="collapse" '
-                f'class="d-flex justify-content-between align-items-center">\n'
-                f'{indent}<span>{sub_dir.name}</span>\n'
-                f'{indent}<i class="bi bi-chevron-down ms-auto"></i>\n'
-                f'{indent}</a>\n'
-                f'{indent}<div id="{collapse_id}" class="collapse">\n'
-                f'{dir_to_ul(sub_dir, level + 1)}\n'
-                f'{indent}</div>\n'
-            )
-        else:
-            result += f'{indent}{sub_dir.name}\n'
-        result += f'{indent}</li>\n'
+        result += f'<li><span>{sub_dir.name}</span> <button onclick="showDirInfo({sub_dir.id})">Info</button>'
+        result += dir_to_ul(sub_dir, level + 1)
+        result += '</li>\n'
 
-    # Print type tables
     for table in directory.type_tables:
         table_url = url_for('versions', table_path=table.path)
-        result += f'{indent}<li class="list-group-item"><a href="{table_url}">{table.name}</a></li>\n'
+        result += f'<li><a href="{table_url}">{table.name}</a> <button onclick="showTableInfo({table.id})">Info</button></li>\n'
 
-    result += f'{indent}</ul>\n'
+    result += '</ul>\n'
     return result
 
 
@@ -111,10 +111,9 @@ def cerate_ccdb_flask_app(test_config=None):
             app_icon="timeline"
         )
 
-    @app.route('/simple')
-    def simple():
-        return render_template("simple.html")
-
+    @app.route('/doc')
+    def documentation():
+        return render_template("doc.html")
 
     @app.route('/tree')
     def directory_tree():
@@ -153,10 +152,16 @@ def cerate_ccdb_flask_app(test_config=None):
         # Get ccdb Alchemy provider from flask global state 'g'
         db: ccdb.AlchemyProvider = g.db
 
-        if table_path:
-            assignments = db.get_assignments("/" + table_path)  # "/test/test_vars/test_table"
-        else:
-            assignments = None
+        try:
+            if table_path:
+                assignments = db.get_assignments("/" + table_path)
+                if not assignments:
+                    return render_template("error.html", message="No assignments found for this table path.",
+                                           table_path=table_path), 404
+            else:
+                return render_template("error.html", message="No table path provided.", table_path=table_path), 404
+        except ccdb.errors.ObjectIsNotFoundInDbError as e:
+            return render_template("error.html", message=str(e), table_path=table_path), 404
 
         return render_template("simple_versions.html", assignments=assignments, table_path=table_path)
 
