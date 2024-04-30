@@ -126,44 +126,53 @@
   </div>
 </div>
 
-<div class="modal" id="infoModal" style="display:none;">
-      <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <div id="modal-body"></div>
+<div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="infoModalLabel">Information</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
+      <div class="modal-body" id="modal-body">
+
+      </div>
+    </div>
+  </div>
 </div>
 
 
 <script type="text/javascript">
 
 $(document).on('click', '.btn-icon', function() {
-    var button = $(this);
-    if (button.closest('li').has('a').length > 0) {
-        var tableId = button.closest('li').find('a').attr('href').split('/')[2]; // Предположим, что URL структурирован таким образом
-        showTableInfo(tableId);
-    } else {
-        var dirId = button.data('dir-id');
-        showDirInfo(dirId);
+        var button = $(this);
+        if (button.closest('li').has('ul').length > 0) {
+            var dirId = button.closest('li').data('dir-id');
+            showDirInfo(dirId);
+        } else {
+            var tableId = button.closest('li').find('a').attr('data-table-id');
+            showTableInfo(tableId);
+        }
+    });
+
+    function showDirInfo(dirId) {
+        fetch(`/get-dir-info/${dirId}`)
+            .then(response => response.text())
+            .then(html => {
+                $('#modal-body').html(html);
+                $('#infoModal').modal('show');
+            });
     }
-});
 
-function showDirInfo(dirId) {
-  fetch(`/get-dir-info/${dirId}`)
-    .then(response => response.text())
-    .then(html => {
-      document.getElementById('modal-body').innerHTML = html;
-      document.getElementById('infoModal').style.display = 'block';
-    });
-}
-
-function showTableInfo(tableId) {
-  fetch(`/get-table-info/${tableId}`)
-    .then(response => response.text())
-    .then(html => {
-      document.getElementById('modal-body').innerHTML = html;
-      document.getElementById('infoModal').style.display = 'block';
-    });
-}
+    function showTableInfo(tableId) {
+        fetch(`/get-table-info/${tableId}`)
+            .then(response => response.text())
+            .then(html => {
+                $('#modal-body').html(html);
+                $('#infoModal').modal('show');
+            });
+    }
 
 function closeModal() {
   document.getElementById('infoModal').style.display = 'none';

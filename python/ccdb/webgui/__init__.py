@@ -1,7 +1,7 @@
 import ccdb
 from ccdb.model import User
 from ccdb.path_utils import parse_request, ParseRequestResult
-from flask import Flask, g, render_template, url_for
+from flask import Flask, g, render_template, url_for, jsonify
 
 from python.ccdb.errors import ObjectIsNotFoundInDbError
 
@@ -127,6 +127,25 @@ def cerate_ccdb_flask_app(test_config=None):
         html_tree = dir_to_ul(root_dir, level=0)
 
         return render_template("simple_tree.html", html_tree=html_tree)
+
+    @app.route('/get-dir-info/<int:dir_id>')
+    def get_dir_info(dir_id):
+        db: ccdb.AlchemyProvider = g.db
+        try:
+            directory = db.get_directory_by_id(dir_id)
+            return render_template('objects_dir_info.html', directory=directory)
+        except ObjectIsNotFoundInDbError:
+            return jsonify({"error": "Directory not found"}), 404
+
+
+    @app.route('/get-table-info/<int:table_id>')
+    def get_table_info(table_id):
+        db: ccdb.AlchemyProvider = g.db
+        try:
+            table = db.get_type_table_by_id(table_id)
+            return render_template('objects_table_info.html', table=table)
+        except ObjectIsNotFoundInDbError:
+            return jsonify({"error": "Table not found"}), 404
 
     @app.route('/vars')
     def variations():
@@ -287,6 +306,9 @@ def cerate_ccdb_flask_app(test_config=None):
                 result += " ".join(row) + "<br>"
 
             return result
+
+
+
 
     # THIS IS FOR FUTURE
     # ====================================================================

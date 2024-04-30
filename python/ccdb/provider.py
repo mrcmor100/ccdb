@@ -297,6 +297,12 @@ class AlchemyProvider(object):
 
             return directory
 
+    def get_directory_by_id(self, dir_id):
+        return self.session.query(Directory).filter(Directory.id == dir_id).one()
+
+    def get_type_table_by_id(self, table_id):
+        return self.session.query(TypeTable).filter(TypeTable.id == table_id).one()
+
     # @brief Updates directory
     #
     # @warning in current realization, if operation succeeded
