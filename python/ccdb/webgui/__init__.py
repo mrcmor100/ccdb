@@ -16,27 +16,6 @@ def print_app_functions(app):
     print()
 
 
-def render_dir_info(directory):
-    """
-    Render HTML for directory information using Flask and Jinja2.
-
-    :param directory: Directory object
-    :type directory: ccdb.model.Directory
-    """
-
-    return render_template('objects_dir_info.html', dir=directory)
-
-
-def render_table_info(table):
-    """
-    Render HTML for table information using Flask and Jinja2.
-
-    :param table: Table object
-    :type table: ccdb.TypeTable
-    """
-    return render_template('objects_table_info.html', table=table)
-
-
 def dir_to_ul(directory, level=0):
     """
     :param directory: Directory
@@ -51,13 +30,13 @@ def dir_to_ul(directory, level=0):
 
     result = '<ul>\n'
     for sub_dir in directory.sub_dirs:
-        result += f'<li><span>{sub_dir.name}</span> <button onclick="showDirInfo({sub_dir.id})">Info</button>'
+        result += f'<li><span>{sub_dir.name}</span> <button onclick="showDirInfo({sub_dir.id})">&#128712;</button>'
         result += dir_to_ul(sub_dir, level + 1)
         result += '</li>\n'
 
     for table in directory.type_tables:
         table_url = url_for('versions', table_path=table.path)
-        result += f'<li><a href="{table_url}">{table.name}</a> <button onclick="showTableInfo({table.id})">Info</button></li>\n'
+        result += f'<li><a href="{table_url}">{table.name}</a> <button onclick="showTableInfo({table.id})">&#128712;</button></li>\n'
 
     result += '</ul>\n'
     return result
@@ -131,21 +110,22 @@ def cerate_ccdb_flask_app(test_config=None):
     @app.route('/get-dir-info/<int:dir_id>')
     def get_dir_info(dir_id):
         db: ccdb.AlchemyProvider = g.db
-        try:
-            directory = db.get_directory_by_id(dir_id)
-            return render_template('objects_dir_info.html', directory=directory)
-        except ObjectIsNotFoundInDbError:
+        directory = db.get_directory_by_id(dir_id)
+        if not directory:
             return jsonify({"error": "Directory not found"}), 404
+        return render_template('objects_dir_info.html', directory=directory)
+
 
 
     @app.route('/get-table-info/<int:table_id>')
     def get_table_info(table_id):
         db: ccdb.AlchemyProvider = g.db
-        try:
-            table = db.get_type_table_by_id(table_id)
-            return render_template('objects_table_info.html', table=table)
-        except ObjectIsNotFoundInDbError:
+        table = db.get_type_table_by_id(table_id)
+        if not table:
             return jsonify({"error": "Table not found"}), 404
+        return render_template('objects_table_info.html', table=table)
+
+
 
     @app.route('/vars')
     def variations():
@@ -219,7 +199,7 @@ def cerate_ccdb_flask_app(test_config=None):
 
         # get request from web form
 
-        # str_request = "/test/test_vars/test_table:0:default:2012-10-30_23-48-41"
+        #str_request = "/test/test_vars/test_table:0:default:2012-10-30_23-48-41"
 
         # parse request and prepare time
         request = parse_request(str_request)
@@ -306,9 +286,6 @@ def cerate_ccdb_flask_app(test_config=None):
                 result += " ".join(row) + "<br>"
 
             return result
-
-
-
 
     # THIS IS FOR FUTURE
     # ====================================================================

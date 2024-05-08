@@ -1,10 +1,10 @@
 {% extends 'dash_base.html' %}
 
 {% block header %}
-<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
 <style>
 .tree, .tree ul {
     margin:0;
@@ -71,51 +71,26 @@
     outline: 0;
 }
 
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgb(0,0,0);
-  background-color: rgba(0,0,0,0.4);
+.modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border-bottom: none;
 }
 
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 15%;
+.modal-title {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    width: 100%;
+    text-align: center;
 }
 
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.btn-icon {
-    background: none;
-    border: none;
-    color: inherit;
-    padding: 0;
-    cursor: pointer;
+.btn-close {
+    align-self: flex-end;
+    margin-bottom: 10px;
 }
 
 </style>
-
 
 <h1 class="text-center my-4">{% block title %}Tables{% endblock %}</h1>
 {% endblock %}
@@ -126,107 +101,111 @@
   </div>
 </div>
 
+<!-- Modal -->
 <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-dialog-scrollable" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="infoModalLabel">Information</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id="modal-body">
-
-      </div>
+        <!-- Dynamic content will be loaded here -->
     </div>
   </div>
 </div>
 
 
 <script type="text/javascript">
-
-$(document).on('click', '.btn-icon', function() {
-        var button = $(this);
-        if (button.closest('li').has('ul').length > 0) {
-            var dirId = button.closest('li').data('dir-id');
-            showDirInfo(dirId);
-        } else {
-            var tableId = button.closest('li').find('a').attr('data-table-id');
-            showTableInfo(tableId);
-        }
-    });
-
-    function showDirInfo(dirId) {
-        fetch(`/get-dir-info/${dirId}`)
-            .then(response => response.text())
-            .then(html => {
-                $('#modal-body').html(html);
-                $('#infoModal').modal('show');
-            });
-    }
-
-    function showTableInfo(tableId) {
-        fetch(`/get-table-info/${tableId}`)
-            .then(response => response.text())
-            .then(html => {
-                $('#modal-body').html(html);
-                $('#infoModal').modal('show');
-            });
-    }
-
-function closeModal() {
-  document.getElementById('infoModal').style.display = 'none';
+function showDirInfo(dirId) {
+    fetch(`/get-dir-info/${dirId}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.text();
+        })
+        .then(html => {
+            $('#infoModal .modal-content').html(html);
+            $('#infoModal').modal('show');
+            adjustModal();
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
 }
 
-$(document).ready(function() {
-    $.fn.extend({
-        treed: function (o) {
-          var openedClass = 'bi-folder2-open';
-          var closedClass = 'bi-folder';
-          var fileClass = 'bi-table';
+function showTableInfo(tableId) {
+    fetch(`/get-table-info/${tableId}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.text();
+        })
+        .then(html => {
+            $('#infoModal .modal-content').html(html);
+            $('#infoModal').modal('show');
+            adjustModal();
+        })
+        .catch(error => {
+            console.error('Failed to load table info:', error);
+        });
+}
 
-          if (typeof o != 'undefined'){
-            if (typeof o.openedClass != 'undefined'){
-                openedClass = o.openedClass;
-            }
-            if (typeof o.closedClass != 'undefined'){
-                closedClass = o.closedClass;
-            }
-          }
+function adjustModal() {
+    $('.modal').each(function() {
+        var originalDisplay = $(this).css('display');
+        $(this).css('display', 'block'); // Показать для измерения
 
-            var tree = $(this);
-            tree.addClass("tree");
-            tree.find('li').has("ul").each(function () {
-                var branch = $(this);
-                branch.prepend("<i class='indicator bi " + closedClass + "'></i>");
-                branch.addClass('branch');
+        var bodyWidth = $(this).find('.modal-body').outerWidth(true); // Ширина содержимого
+        var headerWidth = $(this).find('.modal-header').outerWidth(true); // Ширина заголовка
+        var dialog = $(this).find('.modal-dialog');
 
-                branch.on('click', function (e) {
-                    if (!$(e.target).is('a')) {
-                        var icon = $(this).children('i:first');
-                        icon.toggleClass(openedClass + " " + closedClass);
-                        $(this).children().children().toggle();
-                        e.stopPropagation();
-                    }
-                });
-                branch.children().children().toggle();
-            });
+        // Установка ширины modal-dialog по шире из header или body
+        dialog.css('width', headerWidth > bodyWidth ? headerWidth : bodyWidth);
 
-            tree.find('li:not(:has(ul))').prepend("<i class='indicator bi " + fileClass + "'></i>");
-
-            tree.find('.indicator').on('click', function (e) {
-                $(this).closest('li').click();
-                e.stopPropagation();
-            });
-
-            tree.find('a').on('click', function (e) {
-                e.stopPropagation();
-            });
-        }
+        $(this).css('display', originalDisplay); // Восстановить оригинальное отображение
     });
+}
 
-    $('#tree2').treed();
+
+$(document).ready(function() {
+
+    $('#infoModal').on('shown.bs.modal', adjustModal);
+
+    $('#tree2').treed({
+        openedClass: 'bi-folder2-open',
+        closedClass: 'bi-folder',
+        fileClass: 'bi-table'
+    });
 });
 
+$.fn.extend({
+    treed: function (o) {
+        var openedClass = o.openedClass;
+        var closedClass = o.closedClass;
+        var fileClass = o.fileClass;
+
+        var tree = $(this);
+        tree.addClass("tree");
+        tree.find('li').has("ul").each(function () {
+            var branch = $(this);
+            branch.prepend("<i class='indicator bi " + closedClass + "'></i>");
+            branch.addClass('branch');
+            branch.on('click', function (e) {
+                if (!$(e.target).is('a') && !$(e.target).is('button') && !$(e.target).closest('button').length) {
+                    var icon = $(this).children('i:first');
+                    icon.toggleClass(openedClass + " " + closedClass);
+                    $(this).children().children().toggle();
+                    e.stopPropagation();
+                }
+            });
+            branch.children().children().toggle();
+        });
+
+        tree.find('li:not(:has(ul))').prepend("<i class='indicator bi " + fileClass + "'></i>");
+
+        tree.find('.indicator').on('click', function (e) {
+            $(this).closest('li').click();
+            e.stopPropagation();
+        });
+
+        tree.find('a').on('click', function (e) {
+            e.stopPropagation();
+        });
+    }
+});
 </script>
 {% endblock %}

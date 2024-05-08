@@ -67,35 +67,26 @@
     {
          console.log(event);
          //type table
-         let type_table = document.getElementsByTagName('input')[0];
-         type_table = type_table.value;
-         //event.preventDefault();
-
-         console.log(type_table);
+         let type_table = document.getElementById('tableName').value;
          if(!type_table) {
              alert("Please specify type table");
              return false;
          }
 
          //run number
-         let run = document.getElementsByTagName('input')[1];
-         run = run.value;
-         console.log(run)
+         let run = document.getElementById('runNumber').value
          if(!run){
              alert("Please specify run number");
              return false;
          }
          //variation
-         let variation = document.getElementsByTagName('input')[2];
-         variation= variation.value
-         console.log(variation)
+         let variation = document.getElementById('variationSelect').value;
 
          //now we have everything to build request
          let request = type_table+":"+run +":"+ variation;
 
          //is there a date?
-         let date = document.getElementsByTagName('input')[3];
-         date= date.value;
+         let date = document.getElementById('dateText').value;
          if(date) request = request + ":" +date;
          console.log(request)
 
