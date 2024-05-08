@@ -147,16 +147,15 @@ function showTableInfo(tableId) {
 function adjustModal() {
     $('.modal').each(function() {
         var originalDisplay = $(this).css('display');
-        $(this).css('display', 'block'); // Показать для измерения
+        $(this).css('display', 'block');
 
-        var bodyWidth = $(this).find('.modal-body').outerWidth(true); // Ширина содержимого
-        var headerWidth = $(this).find('.modal-header').outerWidth(true); // Ширина заголовка
+        var bodyWidth = $(this).find('.modal-body').outerWidth(true);
+        var headerWidth = $(this).find('.modal-header').outerWidth(true);
         var dialog = $(this).find('.modal-dialog');
 
-        // Установка ширины modal-dialog по шире из header или body
         dialog.css('width', headerWidth > bodyWidth ? headerWidth : bodyWidth);
 
-        $(this).css('display', originalDisplay); // Восстановить оригинальное отображение
+        $(this).css('display', originalDisplay);
     });
 }
 
