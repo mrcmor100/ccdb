@@ -90,6 +90,10 @@
     margin-bottom: 10px;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
 </style>
 
 <h1 class="text-center my-4">{% block title %}Tables{% endblock %}</h1>
@@ -169,6 +173,13 @@ $(document).ready(function() {
         closedClass: 'bi-folder',
         fileClass: 'bi-table'
     });
+
+    $('#tree2').find('.branch').each(function() {
+        var branch = $(this);
+        if (localStorage.getItem('branch-' + branch.index()) === 'open') {
+            branch.children('.indicator').click();
+        }
+    });
 });
 
 $.fn.extend({
@@ -181,7 +192,7 @@ $.fn.extend({
         tree.addClass("tree");
         tree.find('li').has("ul").each(function () {
             var branch = $(this);
-            branch.prepend("<i class='indicator bi " + closedClass + "'></i>");
+            branch.prepend("<i  class='indicator bi " + closedClass + "'></i>");
             branch.addClass('branch');
             branch.on('click', function (e) {
                 if (!$(e.target).is('a') && !$(e.target).is('button') && !$(e.target).closest('button').length) {
@@ -189,6 +200,12 @@ $.fn.extend({
                     icon.toggleClass(openedClass + " " + closedClass);
                     $(this).children().children().toggle();
                     e.stopPropagation();
+
+                    if (icon.hasClass(openedClass)) {
+                        localStorage.setItem('branch-' + $(this).index(), 'open');
+                    } else {
+                        localStorage.removeItem('branch-' + $(this).index());
+                    }
                 }
             });
             branch.children().children().toggle();
