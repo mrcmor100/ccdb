@@ -114,6 +114,7 @@ def cerate_ccdb_flask_app(test_config=None):
     @app.route('/get-dir-info/<int:dir_id>')
     def get_dir_info(dir_id):
         db: ccdb.AlchemyProvider = g.db
+        db._ensure_dirs_loaded()
         directory = db.get_directory_by_id(dir_id)
         if not directory:
             return jsonify({"error": "Directory not found"}), 404
@@ -122,6 +123,7 @@ def cerate_ccdb_flask_app(test_config=None):
     @app.route('/get-table-info/<int:table_id>')
     def get_table_info(table_id):
         db: ccdb.AlchemyProvider = g.db
+        db._ensure_dirs_loaded()
         table = db.get_type_table_by_id(table_id)
         if not table:
             return jsonify({"error": "Table not found"}), 404
