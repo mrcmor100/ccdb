@@ -1,9 +1,10 @@
 import ccdb
-from ccdb.model import User
+from ccdb.model import User, TypeTable
 from ccdb.path_utils import parse_request, ParseRequestResult
 from flask import Flask, g, render_template, url_for, jsonify
 
-from python.ccdb.errors import ObjectIsNotFoundInDbError
+from ccdb.model import Directory
+from ccdb.errors import ObjectIsNotFoundInDbError
 
 
 def print_app_functions(app):
@@ -25,18 +26,24 @@ def dir_to_ul(directory, level=0):
     :rtype; str
     """
 
+    opened_class = 'bi-folder2-open'
+    closed_class = 'bi-folder'
+    file_class = 'bi-table'
+
     if not len(directory.sub_dirs) and not len(directory.type_tables):
         return "<ul></ul>"
 
     result = '<ul>\n'
     for sub_dir in directory.sub_dirs:
-        result += f'<li><span class="clickable">{sub_dir.name}</span> <button onclick="showDirInfo({sub_dir.id})">&#128712;</button>'
+        assert isinstance(sub_dir, Directory)
+        result += f'<li data="{sub_dir.path}" class="directory"><i class="indicator bi {closed_class}"></i><span class="clickable">{sub_dir.name}</span><button onclick="showDirInfo({sub_dir.id})">&#128712;</button>'
         result += dir_to_ul(sub_dir, level + 1)
         result += '</li>\n'
 
     for table in directory.type_tables:
+        assert isinstance(table, TypeTable)
         table_url = url_for('versions', table_path=table.path)
-        result += f'<li><a class="clickable" href="{table_url}">{table.name}</a> <button onclick="showTableInfo({table.id})">&#128712;</button></li>\n'
+        result += f'<li data="{table.path}"><i class="indicator bi {file_class}"></i><a class="clickable" href="{table_url}">{table.name}</a> <button onclick="showTableInfo({table.id})">&#128712;</button></li>\n'
 
     result += '</ul>\n'
     return result
@@ -47,7 +54,7 @@ def cerate_ccdb_flask_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         # a default secret that should be overridden by instance config
-        SQL_CONNECTION_STRING="mysql://ccdb_user@localhost/ccdb"
+        SQL_CONNECTION_STRING="mysql://ccdb_user@hallddb.jlab.org/ccdb2"
     )
 
     @app.before_request

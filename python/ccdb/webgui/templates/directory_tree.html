@@ -168,50 +168,49 @@ $(document).ready(function() {
 
     $('#infoModal').on('shown.bs.modal', adjustModal);
 
-    $('#tree2').treed({
-        openedClass: 'bi-folder2-open',
-        closedClass: 'bi-folder',
-        fileClass: 'bi-table'
-    });
+    $('#tree2').treed();
 
-    $('#tree2').find('.branch').each(function() {
-        var branch = $(this);
-        if (localStorage.getItem('branch-' + branch.index()) === 'open') {
-            branch.children('.indicator').click();
-        }
-    });
 });
 
 $.fn.extend({
     treed: function (o) {
-        var openedClass = o.openedClass;
-        var closedClass = o.closedClass;
-        var fileClass = o.fileClass;
+        const openedClass = 'bi-folder2-open';
+        const closedClass = 'bi-folder';
+        const fileClass ='bi-table';
 
-        var tree = $(this);
-        tree.addClass("tree");
-        tree.find('li').has("ul").each(function () {
+        let tree = $(this);
+
+        tree.find('.directory').each(function () {
             var branch = $(this);
-            branch.prepend("<i  class='indicator bi " + closedClass + "'></i>");
-            branch.addClass('branch');
+            let branchElement = this;
+            let fullPath = branchElement.getAttribute("data");
+            let localStorageKey = `branch-${fullPath}`;
+
             branch.on('click', function (e) {
                 if (!$(e.target).is('a') && !$(e.target).is('button') && !$(e.target).closest('button').length) {
                     var icon = $(this).children('i:first');
+
                     icon.toggleClass(openedClass + " " + closedClass);
                     $(this).children().children().toggle();
                     e.stopPropagation();
 
+
+
                     if (icon.hasClass(openedClass)) {
-                        localStorage.setItem('branch-' + $(this).index(), 'open');
+                        localStorage.setItem(localStorageKey , 'open');
                     } else {
-                        localStorage.removeItem('branch-' + $(this).index());
+                        localStorage.removeItem(localStorageKey);
                     }
                 }
             });
+
             branch.children().children().toggle();
+            if (localStorage.getItem(localStorageKey) === 'open') {
+                // console.log(directory);
+                branch.children('.indicator').click();
+            }
         });
 
-        tree.find('li:not(:has(ul))').prepend("<i class='indicator bi " + fileClass + "'></i>");
 
         tree.find('.indicator').on('click', function (e) {
             $(this).closest('li').click();
