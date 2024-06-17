@@ -79,6 +79,11 @@ class CliManagerTests(unittest.TestCase):
         self.cli.process_command_line("cat /test/test_vars/test_table")
         self.assertIn("2.3", self.output.getvalue())
 
+    def test_cat_not_abs_path(self):
+        """In non-interactive mode, cat should handle path without leading / as absolute anyway"""
+        self.cli.process_command_line("cat test/test_vars/test_table")
+        self.assertIn("2.3", self.output.getvalue())
+
     def test_variation_backup(self):
         """Test Backup of """
 

@@ -107,12 +107,15 @@ class Cat(CliCommandBase):
         @param request: Parsed request
         @type request: ParseRequestResult
         """
+
+        # In non-interactive mode, cat should handle path without leading / as absolute anyway
+        # Check mode and if relative path is given
+        if not self.context.is_interactive and request.path_is_parsed and not request.path.startswith("/"):
+            # PatCH the PaTH
+            request.path = "/" + request.path
+
+        # get the assignment from DB
         return self.context.provider.get_assignment_by_request(request)
-
-    # ----------------------------------------
-    #   gets assignment by parsed request
-    # ----------------------------------------
-
 
     # ----------------------------------------
     #   process_arguments

@@ -55,13 +55,19 @@ class AddThenDumpFileTests(unittest.TestCase):
                 raise
 
     def tearDown(self):
+        self.context.process_command_line("vers /test/channel_mc_efficiency")
         with helper.captured_output() as (out, err):
             self.context.process_command_line("vers /test/channel_mc_efficiency")
         text = str(out.getvalue())
         line = text.split("\n")[1]
         assignment_id = int(shlex.split(line)[0])
-        self.context.process_command_line("rm -f -a {0}".format(assignment_id))
-        self.context.process_command_line("rm -f -t /test/channel_mc_efficiency")
+        try:
+            self.context.process_command_line("rm -f -a {0}".format(assignment_id))
+            self.context.process_command_line("rm -f -t /test/channel_mc_efficiency")
+        except Exception as ex:
+            print("Error removing '/test/channel_mc_efficiency'. It might be OK(!). " + str(ex) + os.linesep)
+            self.context.process_command_line("vers /test/channel_mc_efficiency")
+
         helper.clean_test_sqlite_db()
 
     def test_same_content(self):
