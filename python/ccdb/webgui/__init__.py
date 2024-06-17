@@ -1,9 +1,10 @@
 import ccdb
-from ccdb.model import User
+from ccdb.model import User, TypeTable
 from ccdb.path_utils import parse_request, ParseRequestResult
 from flask import Flask, g, render_template, url_for, jsonify
 
-from python.ccdb.errors import ObjectIsNotFoundInDbError
+from ccdb.model import Directory
+from ccdb.errors import ObjectIsNotFoundInDbError
 
 
 def print_app_functions(app):
@@ -25,18 +26,24 @@ def dir_to_ul(directory, level=0):
     :rtype; str
     """
 
+    opened_class = 'bi-folder2-open'
+    closed_class = 'bi-folder'
+    file_class = 'bi-table'
+
     if not len(directory.sub_dirs) and not len(directory.type_tables):
         return "<ul></ul>"
 
     result = '<ul>\n'
     for sub_dir in directory.sub_dirs:
-        result += f'<li><span>{sub_dir.name}</span> <button onclick="showDirInfo({sub_dir.id})">&#128712;</button>'
+        assert isinstance(sub_dir, Directory)
+        result += f'<li data="{sub_dir.path}" class="directory"><i class="indicator bi {closed_class}"></i><span class="clickable">{sub_dir.name}</span><button onclick="showDirInfo({sub_dir.id})">&#128712;</button>'
         result += dir_to_ul(sub_dir, level + 1)
         result += '</li>\n'
 
     for table in directory.type_tables:
+        assert isinstance(table, TypeTable)
         table_url = url_for('versions', table_path=table.path)
-        result += f'<li><a href="{table_url}">{table.name}</a> <button onclick="showTableInfo({table.id})">&#128712;</button></li>\n'
+        result += f'<li data="{table.path}"><i class="indicator bi {file_class}"></i><a class="clickable" href="{table_url}">{table.name}</a> <button onclick="showTableInfo({table.id})">&#128712;</button></li>\n'
 
     result += '</ul>\n'
     return result
@@ -47,7 +54,7 @@ def cerate_ccdb_flask_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         # a default secret that should be overridden by instance config
-        SQL_CONNECTION_STRING="mysql://ccdb_user@localhost/ccdb"
+        SQL_CONNECTION_STRING="mysql://ccdb_user@hallddb.jlab.org/ccdb2"
     )
 
     @app.before_request
@@ -79,21 +86,18 @@ def cerate_ccdb_flask_app(test_config=None):
         db.get_root_directory()
 
         # Render a template with the directories
-        return render_template("simple_direcotires.html", dirs_by_path=db.dirs_by_path)
+        return render_template("direcotires.html", dirs_by_path=db.dirs_by_path)
+
+    # @app.route('/')
+    # def index():
+    #     return render_template(
+    #         "dash_base.html",
+    #         app_name="Material Dashboard with Bokeh embedded in Flask",
+    #         app_description="This Dashboard is served by a Bokeh server embedded in Flask.",
+    #         app_icon="timeline"
+    #     )
 
     @app.route('/')
-    def index():
-        return render_template(
-            "dash_base.html",
-            app_name="Material Dashboard with Bokeh embedded in Flask",
-            app_description="This Dashboard is served by a Bokeh server embedded in Flask.",
-            app_icon="timeline"
-        )
-
-    @app.route('/doc')
-    def documentation():
-        return render_template("doc.html")
-
     @app.route('/tree')
     def directory_tree():
         # Get ccdb Alchemy provider from flask global state 'g'
@@ -105,27 +109,25 @@ def cerate_ccdb_flask_app(test_config=None):
         # Generate html code of directory tree
         html_tree = dir_to_ul(root_dir, level=0)
 
-        return render_template("simple_tree.html", html_tree=html_tree)
+        return render_template("directory_tree.html", html_tree=html_tree, dirs_by_path=db.dirs_by_path)
 
     @app.route('/get-dir-info/<int:dir_id>')
     def get_dir_info(dir_id):
         db: ccdb.AlchemyProvider = g.db
+        db._ensure_dirs_loaded()
         directory = db.get_directory_by_id(dir_id)
         if not directory:
             return jsonify({"error": "Directory not found"}), 404
         return render_template('objects_dir_info.html', directory=directory)
 
-
-
     @app.route('/get-table-info/<int:table_id>')
     def get_table_info(table_id):
         db: ccdb.AlchemyProvider = g.db
+        db._ensure_dirs_loaded()
         table = db.get_type_table_by_id(table_id)
         if not table:
             return jsonify({"error": "Table not found"}), 404
         return render_template('objects_table_info.html', table=table)
-
-
 
     @app.route('/vars')
     def variations():
@@ -143,7 +145,11 @@ def cerate_ccdb_flask_app(test_config=None):
 
         records = db.get_log_records(1000)
 
-        return render_template("simple_logs.html", records=records)
+        return render_template("logs.html", records=records)
+
+    @app.route('/doc')
+    def documentation():
+        return render_template("doc.html")
 
     @app.route('/versions/<path:table_path>')
     def versions(table_path):
@@ -162,7 +168,7 @@ def cerate_ccdb_flask_app(test_config=None):
         except ccdb.errors.ObjectIsNotFoundInDbError as e:
             return render_template("error.html", message=str(e), table_path=table_path), 404
 
-        return render_template("simple_versions.html", assignments=assignments, table_path=table_path)
+        return render_template("versions.html", assignments=assignments, table_path=table_path)
 
     @app.route('/test_request')
     def test_request():
@@ -196,10 +202,6 @@ def cerate_ccdb_flask_app(test_config=None):
         author = ""
         run_range = ""
         comment = ""
-
-        # get request from web form
-
-        #str_request = "/test/test_vars/test_table:0:default:2012-10-30_23-48-41"
 
         # parse request and prepare time
         request = parse_request(str_request)

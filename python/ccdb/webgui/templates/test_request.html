@@ -62,71 +62,72 @@
     </div>
   </div>
 
-    <script type="text/javascript">
-    function combineRequest(event)
-    {
-         console.log(event);
-         //type table
-         let type_table = document.getElementById('tableName').value;
-         if(!type_table) {
-             alert("Please specify type table");
-             return false;
-         }
 
-         //run number
-         let run = document.getElementById('runNumber').value
-         if(!run){
-             alert("Please specify run number");
-             return false;
-         }
-         //variation
-         let variation = document.getElementById('variationSelect').value;
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+<script type="text/javascript">
 
-         //now we have everything to build request
-         let request = type_table+":"+run +":"+ variation;
-
-         //is there a date?
-         let date = document.getElementById('dateText').value;
-         if(date) request = request + ":" +date;
-         console.log(request)
-
-        // //insert request value to our hidden input and return true
-        // console.log(request);
-        // // $("#requestHidden").val(request);
-
-        let hidden = document.getElementById('requestHidden');
-        hidden.setAttribute("value", request);
-
-        return false;
+document.addEventListener("DOMContentLoaded", function() {
+    let form = document.getElementById("form1");
+    if (form.addEventListener) {
+        form.addEventListener("submit", combineRequest, false);  //Modern browsers
     }
 
-    /*var acpl = @tables_autocomplete;
+    var acpl = {{ tables_autocomplete|safe }};
 
-
-    $(document).ready(function () {
-
-        $("#variationSelect").find("option[value=default]").attr('selected', true);
-
-        $("input#tableName").autocomplete({
-                                              source: function(request, response) {
-                                                  //show only first 10 autocomplete results
-                                                  var results = $.ui.autocomplete.filter(acpl, request.term);
-                                                  response(results.slice(0, 10));
-                                              }
-                                          });
-        //catch form submit
-        $("#form1").submit(function(){
-            return combineRequest();
-        });
+    var tableNameInput = $("input#tableName");
+    tableNameInput.autocomplete({
+        source: acpl.slice(0, 10),
+        classes: {
+            "ui-autocomplete": "dropdown-menu"
+        }
     });
-    */
 
-        document.addEventListener("DOMContentLoaded", function() {
-            let form = document.getElementById("form1");
-            if(form.addEventListener) {
-                form.addEventListener("submit", combineRequest, false);  //Modern browsers
-            };
-        });
+    tableNameInput.data("ui-autocomplete")._renderItem = function(ul, item) {
+        return $("<li class='dropdown-item'></li>")
+            .attr("data-value", item.value)
+            .append(item.label)
+            .appendTo(ul);
+    };
+});
 
-    </script>
+
+function combineRequest(event)
+{
+     console.log(event);
+     //type table
+     let type_table = document.getElementById('tableName').value;
+     if(!type_table) {
+         alert("Please specify type table");
+         return false;
+     }
+
+     //run number
+     let run = document.getElementById('runNumber').value
+     if(!run){
+         alert("Please specify run number");
+         return false;
+     }
+     //variation
+     let variation = document.getElementById('variationSelect').value;
+
+     //now we have everything to build request
+     let request = type_table+":"+run +":"+ variation;
+
+     //is there a date?
+     let date = document.getElementById('dateText').value;
+     if(date) request = request + ":" +date;
+     console.log(request)
+
+    // //insert request value to our hidden input and return true
+    // console.log(request);
+    // // $("#requestHidden").val(request);
+
+    let hidden = document.getElementById('requestHidden');
+    hidden.setAttribute("value", request);
+
+    return false;
+}
+
+</script>
 {% endblock %}

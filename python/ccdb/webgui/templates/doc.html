@@ -6,13 +6,27 @@
 
 {% block content %}
   <div class="container mt-5">
+    <div class="card">
       <div class="card-body" style="font-size: 1.25rem;">
-        <p>
-          <a target="_blank" href="https://halldweb1.jlab.org/wiki/index.php/Calibration_Database"
-             class="btn btn-primary text-white" style="text-decoration: none;">
-            Visit the Calibration Database GluEX Wiki Page
-          </a>
-        </p>
+
+        <!-- GitHub Link -->
+        <div class="row">
+          <h4 class="col-auto">GitHub Repository</h4>-
+          <p class="col-auto"><a href="https://github.com/JeffersonLab/ccdb" target="_blank">Jefferson Lab CCDB GitHub repository</a>.</p>
+        </div>
+
+        <!-- GitHub Issues Link -->
+        <div class="row">
+          <h4 class="col-auto">Support & Issues</h4>-
+          <p class="col-auto"><a href="https://github.com/JeffersonLab/ccdb/issues" target="_blank">GitHub Issues page</a>.</p>
+        </div>
+
+        <!-- Wiki Link -->
+        <div class="row">
+          <h4 class="col-auto">Documentation & Resources</h4>-
+          <p class="col-auto"><a href="https://halldweb1.jlab.org/wiki/index.php/Calibration_Database" target="_blank">Calibration Database GluEX Wiki Page</a>.</p>
+        </div>
       </div>
     </div>
+  </div>
 {% endblock %}

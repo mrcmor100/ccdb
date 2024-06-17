@@ -298,10 +298,21 @@ class AlchemyProvider(object):
             return directory
 
     def get_directory_by_id(self, dir_id):
-        return self.session.query(Directory).filter(Directory.id == dir_id).one()
+        self._ensure_dirs_loaded()
+        return self.dirs_by_id[dir_id]
 
     def get_type_table_by_id(self, table_id):
-        return self.session.query(TypeTable).filter(TypeTable.id == table_id).one()
+        type_table = self.session.query(TypeTable).filter(TypeTable.id == table_id).one()
+        assert isinstance(type_table, TypeTable)
+
+        # We set parent_dir here manually because we want to ensure that
+        # the directory comes after self._ensure_dirs_loaded() is called
+        # this is important to have all directories correct full paths to be set
+        # and consequently to have correct full path set for the table!!!!!!
+        parent_dir = self.get_directory_by_id(type_table.parent_dir_id)
+        type_table.parent_dir = parent_dir
+
+        return parent_dir
 
     # @brief Updates directory
     #
