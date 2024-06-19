@@ -110,7 +110,8 @@ class Cat(CliCommandBase):
 
         # In non-interactive mode, cat should handle path without leading / as absolute anyway
         # Check mode and if relative path is given
-        if not self.context.is_interactive and request.path_is_parsed and not request.path.startswith("/"):
+        path_check_needed = not self.context.is_interactive or self.context.current_path in ["/", ""]
+        if path_check_needed and request.path_is_parsed and not request.path.startswith("/"):
             # PatCH the PaTH
             request.path = "/" + request.path
 
@@ -405,7 +406,7 @@ class Cat(CliCommandBase):
     def print_help(self):
         """Prints help of the command"""
 
-        print ("""Show data values for assignment.
+        print("""Show data values for assignment.
 
 Usage:
     cat <request or table path>

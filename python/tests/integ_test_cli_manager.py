@@ -84,6 +84,11 @@ class CliManagerTests(unittest.TestCase):
         self.cli.process_command_line("cat test/test_vars/test_table")
         self.assertIn("2.3", self.output.getvalue())
 
+        # in interactive mode it should also work if the path is absolute
+        self.cli.context.is_interactive = True
+        self.cli.process_command_line("cat test/test_vars/test_table")
+        self.assertIn("2.3", self.output.getvalue())
+
     def test_variation_backup(self):
         """Test Backup of """
 
