@@ -16,6 +16,7 @@ from .cli_command import CliCommandBase
 from .cli_context import CliContext
 from . import themes
 from . import colorama
+from ccdb.version import version as ccdb_version
 
 CCDB_EXCEPTIONS_THROW = "throw"       # Rethrow all exceptions
 CCDB_EXCEPTIONS_SILENT = "print"    # Print exceptions but not rethrow them
@@ -519,9 +520,9 @@ class CliManager(object):
         log.info("Default run: '" + str(self.context.current_run) + "'")
 
     def print_interactive_intro(self):
-        print("""
+        print(f"""
 +--------------------------+
-  CCDB shell v.2.00.00
+  CCDB shell {ccdb_version}
 +--------------------------+
        """)
         print((self.theme.Title + "Interactive mode"))

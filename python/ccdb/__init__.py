@@ -22,6 +22,7 @@ import logging
 import inspect
 from . import path_utils
 
+
 def get_ccdb_home_path():
     if "CCDB_HOME" in os.environ:
         return os.environ["CCDB_HOME"]
@@ -30,6 +31,7 @@ def get_ccdb_home_path():
     this_dir = os.path.join(this_dir, "..", "..")
     this_dir = os.path.normpath(this_dir)
     return this_dir
+
 
 def insert_ext_lib_in_python_path():
     """
@@ -70,10 +72,11 @@ from .cmd.themes import NoColorTheme, ColoredTheme
 from .brace_log_message import BraceMessage
 from .cmd import themes
 from ccdb.cmd.cli_manager import CCDB_EXCEPTIONS_THROW, CCDB_EXCEPTIONS_SILENT
+from ccdb.version import version as ccdb_version
+
 
 # the default ccdb logger
 logger = logging.getLogger("ccdb")
-
 
 
 if sys.version_info < (2, 7, 0):
@@ -113,7 +116,11 @@ def init_ccdb_console():
     if "-h" in sys.argv or "--help" in sys.argv:
         print("Please call 'ccdb help' for help")
 
-    cmd.colorama.init(autoreset=True)
+    if "--version" in sys.argv:
+        print(ccdb_version)
+        exit(0)
+
+    ccdb.cmd.colorama.init(autoreset=True)
 
     if "--no-color" in sys.argv:
         # no colors for output

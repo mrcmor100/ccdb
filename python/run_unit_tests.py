@@ -10,6 +10,7 @@ test_names = [
     'unit_test_dump_comments',
     'unit_test_path_utils',
     'unit_test_utility_argument_parse',
+    'unit_test_version',
     'integ_test_cli_manager',
     'integ_test_provider_sqlite',
     'integ_test_provider_mysql'
