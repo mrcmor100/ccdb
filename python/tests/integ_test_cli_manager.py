@@ -83,11 +83,11 @@ class CliManagerTests(unittest.TestCase):
         # Test DB has a test data assignment for:
         # variation: test
         # runs: 500-2000
-        # it has data: [[4,6,8],[10,12,13]]
+        # it has data: 1.0|2.0|3.0|4.0|5.0|6.0
         self.cli.context.current_variation = "test"
         self.cli.context.current_run = 600
         self.cli.process_command_line("cat /test/test_vars/test_table")
-        self.assertIn("13", self.output.getvalue())
+        self.assertIn("6.1", self.output.getvalue())
 
 
     def test_cat_not_abs_path(self):

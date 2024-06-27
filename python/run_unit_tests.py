@@ -43,4 +43,5 @@ if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
     unit_test_dir = os.path.join(script_dir, "tests")
     os.chdir(unit_test_dir)
-    run_unit_tests()
+    result = run_unit_tests()
+    exit(len(result.failures))
