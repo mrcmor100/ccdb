@@ -1,3 +1,6 @@
+# There are a number of tools and configs for unit testing which is convenient to have in ccdb package.
+# The unit tests and integration tests are located outside of the package
+
 import inspect
 import os
 import shutil
@@ -33,8 +36,10 @@ else:
 # SQLite connection string for tests
 sqlite_test_file_path = os.path.join(os.getcwd(), 'test.sqlite')
 
+
 # SQLite connection string for tests
 sqlite_test_connection_str = "sqlite:///" + os.path.join(ccdb_path, 'sql', 'ccdb.sqlite')
+
 
 def recreate_mysql_db(connection_str):
     """ Erases the test database and put it to default conditions """
@@ -50,10 +55,7 @@ def recreate_mysql_db(connection_str):
     cli.process_command_line("db init --init-i-am-sure")
 
 
-
-
-
-def recreate_mysql_db2(connection_string='mysql+pymysql://ccdb_user@localhost/ccdb_test'):
+def recreate_mysql_db2(connection_string):
     from sqlalchemy import create_engine, text
     from sqlalchemy.exc import SQLAlchemyError
 

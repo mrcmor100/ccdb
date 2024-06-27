@@ -1,15 +1,14 @@
 from ccdb.errors import DatabaseStructureError
 from ccdb.errors import AnonymousUserForbiddenError
-
-try:
-    from . import provider_fixture
-    from . import helper
-except:
-    import provider_fixture
-    import helper
-
+from ccdb import testing as helper
 import unittest
 import ccdb
+
+# Have to import it this way as tests may be considered a package or not depending on context
+try:
+    from . import provider_fixture
+except:
+    import provider_fixture
 
 
 class MySQLAlchemyProviderTest(provider_fixture.AlchemyProviderTest):

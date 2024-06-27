@@ -15,10 +15,8 @@ from ccdb.errors import ObjectIsNotFoundInDbError
 import ccdb.path_utils
 import ccdb.cmd.themes
 from ccdb.cmd.cli_manager import CliManager, CCDB_EXCEPTIONS_THROW
-try:
-    from . import helper
-except:
-    import helper
+from ccdb import testing as helper
+
 
 logger = logging.getLogger("ccdb")
 

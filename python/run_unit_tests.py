@@ -1,8 +1,6 @@
-import glob
 import unittest
-import inspect
 import os
-import tests
+from ccdb import testing as ccdb_testing
 
 test_names = [
     'unit_test_authentication',
@@ -33,7 +31,16 @@ def run_unit_tests():
 
 
 if __name__ == "__main__":
-    script_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+
+    if ccdb_testing.ENV_TEST_MYSQL not in os.environ:
+        print(f"(!)WARNING(!) TESTS Mysql Connection string is not set in {ccdb_testing.ENV_TEST_MYSQL}")
+        print(f"Using default: {ccdb_testing.mysql_test_connection_str}")
+
+    if ccdb_testing.ENV_TEST_SQLITE not in os.environ:
+        print(f"(!)WARNING(!) TESTS SQLite Connection string is not set in {ccdb_testing.ENV_TEST_SQLITE}")
+        print(f"Using default: {ccdb_testing.sqlite_test_file_path}")
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     unit_test_dir = os.path.join(script_dir, "tests")
     os.chdir(unit_test_dir)
     run_unit_tests()

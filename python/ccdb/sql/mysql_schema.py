@@ -355,6 +355,7 @@ def init_mysql_database(engine, tables_dict=None):
             except SQLAlchemyError as e:
                 print(f"Error processing table '{table_name}': {str(e)}")
 
+
 def generate_mysql_sql_file(tables_dict, file_path='mysql_setup.sql'):
     """
     Generate a MySQL .sql file with drop, create, and insert commands

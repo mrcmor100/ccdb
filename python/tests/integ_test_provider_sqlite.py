@@ -2,12 +2,13 @@ import os
 
 from ccdb import get_ccdb_home_path
 from ccdb.errors import DatabaseStructureError
+from ccdb import testing as helper
+
+# Have to import it this way as tests may be considered a package or not depending on context
 try:
     from . import provider_fixture
-    from . import helper
 except:
     import provider_fixture
-    import helper
 
 
 # noinspection PyPep8Naming

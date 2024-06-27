@@ -9,12 +9,7 @@ from ccdb.errors import DatabaseStructureError, UserNotFoundError, ObjectIsNotFo
 
 from ccdb import AlchemyProvider
 from ccdb.path_utils import ParseRequestResult
-
-try:
-    from . import helper
-except ImportError:
-    import helper
-
+from ccdb import testing as helper
 
 class AlchemyProviderTest(unittest.TestCase):
     ccdb_path = get_ccdb_home_path()
