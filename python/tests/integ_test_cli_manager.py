@@ -77,6 +77,19 @@ class CliManagerTests(unittest.TestCase):
         self.cli.process_command_line("cat /test/test_vars/test_table")
         self.assertIn("2.3", self.output.getvalue())
 
+    def test_cat_user_set_variation(self):
+        """In non-interactive mode, cat should handle path without leading / as absolute anyway"""
+
+        # Test DB has a test data assignment for:
+        # variation: test
+        # runs: 500-2000
+        # it has data: [[4,6,8],[10,12,13]]
+        self.cli.context.current_variation = "test"
+        self.cli.context.current_run = 600
+        self.cli.process_command_line("cat /test/test_vars/test_table")
+        self.assertIn("13", self.output.getvalue())
+
+
     def test_cat_not_abs_path(self):
         """In non-interactive mode, cat should handle path without leading / as absolute anyway"""
         self.cli.process_command_line("cat test/test_vars/test_table")

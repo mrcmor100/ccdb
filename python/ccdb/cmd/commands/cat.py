@@ -147,7 +147,7 @@ class Cat(CliCommandBase):
 
         parser.add_argument("-d", "--directory")
         parser.add_argument("-v", "--variation")
-        parser.add_argument("-a", "--ass-id")
+        parser.add_argument("-a", "--id")
         parser.add_argument("-r", "--run")
         parser.add_argument("-f", "--file")
         parser.add_argument("-ph", "--horizontal", action="store_true", dest='user_request_print_horizontal')
@@ -158,6 +158,16 @@ class Cat(CliCommandBase):
         if result.obj_name:
             # it probably must be a request or just a table name
             result.request = parse_request(result.obj_name)
+
+        # Check if user set the default variation
+        if not result.request.variation_is_parsed and self.context.current_variation:
+            result.request.variation = self.context.current_variation
+            result.request.variation_is_parsed = True
+
+        # Check if user set the default run
+        if not result.request.run_is_parsed and self.context.current_run:
+            result.request.run = self.context.current_run
+            result.request.run_is_parsed = True
 
         return result
 
@@ -410,7 +420,7 @@ class Cat(CliCommandBase):
 
 Usage:
     cat <request or table path>
-    cat --id <assignment_id>   #Where assignment_id provided by 'vers <table path>' command
+    cat -a <assignment_id>   #Where assignment_id provided by 'vers <table path>' command
 
 Formatting flags:
 
