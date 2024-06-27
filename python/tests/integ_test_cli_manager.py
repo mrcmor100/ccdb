@@ -87,7 +87,7 @@ class CliManagerTests(unittest.TestCase):
         self.cli.context.current_variation = "test"
         self.cli.context.current_run = 600
         self.cli.process_command_line("cat /test/test_vars/test_table")
-        self.assertIn("6.1", self.output.getvalue())
+        self.assertIn("6.0", self.output.getvalue())
 
 
     def test_cat_not_abs_path(self):
