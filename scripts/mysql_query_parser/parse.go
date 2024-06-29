@@ -35,9 +35,7 @@ func main() {
 			fmt.Println(line)
 			fmt.Printf("%#v\n", runMinRegexp.FindStringSubmatch(line))
 			fmt.Printf("%#v\n", variationRegexp.FindStringSubmatch(line))
-
 		}
-
 
 		lineNum++
 		if lineNum > 1000 {
