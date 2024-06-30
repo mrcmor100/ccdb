@@ -20,6 +20,8 @@ Flags:
     
     --groupid - POSIX Group ID to get users from. E.g. on ifarm halld is 267
     
+    --test - Don't do real changes in DB if this flag is given. To be used for scripts and cronjob testing purposes 
+    
 
 Examples:
     #recreate user list from halld group
@@ -41,7 +43,7 @@ def get_provider(con_str):
     return provider
 
 
-def delete_users(provider):
+def delete_users(provider, is_test):
     god_list = ["anonymous", "test_user"]
     assert isinstance(provider, AlchemyProvider)
 
@@ -49,7 +51,10 @@ def delete_users(provider):
     deleted_count = 0
     for user in users:
         if not user.name in god_list:
-            provider.delete_user(user.name)
+            if is_test:
+                print(f"Should have deleted: {user.name} (--test flag is given, user won't be deleted) ")
+            else:
+                provider.delete_user(user.name)
             deleted_count += 1
     print("Users deleted {}".format(deleted_count))
 
@@ -99,7 +104,7 @@ def get_user_names_from_ypmatch(ypstr):
     return [token for token in lexer]
 
 
-def create_users(provider, user_names):
+def create_users(provider, user_names, is_test):
     """
 
     @param provider:Connected alchemy provider
@@ -108,7 +113,10 @@ def create_users(provider, user_names):
     count = 0
     for name in user_names:
         try:
-            provider.create_user(name)
+            if is_test:
+                print(f"Should have created: '{name}' (--test flag is given, user won't be created) ")
+            else:
+                provider.create_user(name)
             count += 1
         except UserExistsError as err:
             print(err.message)
@@ -121,26 +129,20 @@ def parse_arguments():
     parser.add_argument('connection_string', type=str, help='Connection string for the database, e.g., mysql://ccdb_user@localhost/ccdb')
     parser.add_argument('--recreate', action='store_true', help='Delete all users before creating new ones')
     parser.add_argument('--groupid', default=267, help='POSIX Group ID to get usernames from')
+    parser.add_argument('--test', action='store_true', help="Don't do real changes in DB, allowing testing of this script ")
     args = parser.parse_args()
-    return args.connection_string, args.recreate, args.groupid
+    return args.connection_string, args.recreate, args.groupid, args.test
 
 
 def main():
     # Parse command line arguments
-    connection_str, recreate, groupid = parse_arguments()
+    connection_str, recreate, group_id, is_test = parse_arguments()
 
     # Check stdin for usernames
-    names = get_names(groupid)
+    names = get_names(group_id)
     if not names:
-        print("No user names found in stdin (pipe). Script continues to delete somebody if --recreate flag is given...")
+        print("No user names found. Script continues to delete somebody if --recreate flag is given...")
         exit(1)
-
-    # light parse arguments
-    for token in sys.argv[1:]:
-        if token == "--recreate":
-            recreate = True
-        else:
-            connection_str = token
 
     print("Connecting to '" + connection_str + "'")
 
@@ -149,16 +151,16 @@ def main():
 
     # delete old users if needed
     if recreate:
-        print ("Deleting users...")
+        print("Deleting users ...")
         try:
-            delete_users(provider)
+            delete_users(provider, is_test)
         except Exception as ex:
             print("User deletion failed with error of type {} : {}".format(type(ex), str(ex)))
             sys.exit(2)
 
     # create new users
     try:
-        create_users(provider, names)
+        create_users(provider, names, is_test)
     except Exception as ex:
         print("User creation failed with error of type {} : {}".format(type(ex), str(ex)))
         sys.exit(3)
