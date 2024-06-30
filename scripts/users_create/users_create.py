@@ -65,22 +65,20 @@ def get_names(groupid):
     output = []
 
     # Execute the 'getent group' command
-    proc = subprocess.Popen(['getent', 'group'], stdout=subprocess.PIPE, text=True)
+    # we do str(int(groupid)) to be sure we are safe of wrong input type
+    proc = subprocess.Popen(['getent', 'group', str(int(groupid))], stdout=subprocess.PIPE, text=True)
+    output, _ = proc.communicate()
 
-    # Read the output line by line
-    for line in proc.stdout:
-        if f':{groupid}:' in line:
-            group_count += 1
-            if group_count > 1:
-                output.append(',')
-            # Split the line and get the part after the group ID
-            parts = line.strip().split(f':{groupid}:')
-            if len(parts) > 1:
-                output.append(parts[1])
+    # The result will be something like halld:*:267:user1,user2,... so we split by ':'
+    members_str = output.strip().split(':')[-1].strip()
 
+    print(f"Parsing members list for GroupID={groupid}:")
+    print(members_str)
+
+    members = members_str.split(',')
     # Join the output list into a single string and print
-    print(''.join(output))
-    return output
+    print(f"Total members of GroupID={groupid}: {len(members)}")
+    return members
 
 
 def get_user_names_from_ypmatch(ypstr):
@@ -167,5 +165,5 @@ def main():
 
 
 if __name__ == "__main__":
-    get_names()
-    #main()
+    main()
+
