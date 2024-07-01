@@ -80,15 +80,17 @@ class Versions(CliCommandBase):
             print(("For variation: {}".format(variation)))
 
         # table header... and table =)
-        print((self.theme.Directories + "(ID)   (Created)              (Modified)              (variation)     (run range)      (comments)"))
+        print((self.theme.Directories + "(ID)     (created)              (user)           (variation)     (run range)      (comments)"))
         for asgmnt in assignments:
-            assert isinstance(asgmnt, ccdb.Assignment)
+            assert isinstance(asgmnt, ccdb.model.Assignment)
+            assert isinstance(asgmnt.author, ccdb.model.User)
+
             max_str = repr(asgmnt.run_range.max)
             if asgmnt.run_range.max == ccdb.INFINITE_RUN:
                 max_str="inf"
-            print((" %-5i "%asgmnt.id +\
+            print((" %-6i "%asgmnt.id +\
                   " %-20s"%asgmnt.created.strftime("%Y-%m-%d %H-%M-%S   ") +\
-                  " %-20s"%asgmnt.modified.strftime("%Y-%m-%d %H-%M-%S   ") + " " +\
+                  " %-15s" % asgmnt.author.name + " " +\
                   " %-14s "%asgmnt.variation.name +\
                   " %-15s "%(repr(asgmnt.run_range.min) + "-" + max_str) +\
                   asgmnt.comment[0:20].replace("\n", " ")))
