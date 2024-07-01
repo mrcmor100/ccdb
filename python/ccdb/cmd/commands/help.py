@@ -26,9 +26,9 @@ class HelpUtil(CliCommandBase):
 
         if self.context:
             print("Available commands:")
-            print("   %-10s %-15s %s:"%("(command)", "(name)", "(description)"))
+            print("   %-10s %-15s %s:" % ("(command)", "(name)", "(description)"))
             print("   " + "\n  ".join(
-                ["%-10s %-15s %s" % (command, util.name, util.short_descr) 
+                ["%-10s %-15s %s" % (f"'{command}'", util.name, util.short_descr)
                     for command, util
                     in list(self.context.commands.items())
                     if not util.help_util]))
@@ -69,6 +69,8 @@ Flags:
                          Set connection string to server
 
     --mysql-pwd          Ask for MySQL password before connecting to database
+    
+    --version            Print ccdb version (and quit)
 
     Debug helping flags:
     
