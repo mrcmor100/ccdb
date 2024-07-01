@@ -163,6 +163,10 @@ class AlchemyProvider(object):
         """
         self._ensure_dirs_loaded()
 
+        # Better reporting for empty path
+        if not path:
+            raise ValueError(f"Can't get directory as 'path' is null or empty: '{path}'")
+
         # we don't have this directory
         if path not in list(self.dirs_by_path.keys()):
             raise ObjectIsNotFoundInDbError(Directory, "Can't find the directory with path '{0}'".format(path))
@@ -477,6 +481,10 @@ class AlchemyProvider(object):
         :rtype: TypeTable
         """
         self._ensure_dirs_loaded()  # even with self.get_directory do not remove it
+
+        # Better reporting for empty path
+        if not exact_path:
+            raise ValueError(f"Can't get type table as 'exact_path' path variable is null or empty: '{exact_path}'")
 
         parent_dir_path = posixpath.dirname(exact_path)
         table_name = posixpath.basename(exact_path)
