@@ -29,7 +29,7 @@ class Dump(CliCommandBase):
 
         self.theme = NoColorTheme()
         # self.context.utils["cat"].theme = NoColorTheme()
-        return "cat --no-borders --no-header --comments --time --horizontal " + " ".join(args)
+        return "cat --no-borders --no-header --comments --horizontal " + " ".join(args)
 
     def print_help(self):
         """Prints help of the command"""

@@ -5,9 +5,8 @@ import os
 from ccdb import TypeTable, Assignment
 from ccdb import AlchemyProvider
 from ccdb.cmd import CliCommandBase, UtilityArgumentParser
-from ccdb.path_utils import ParseRequestResult, parse_request
-from ccdb import BraceMessage as Lfm  # lfm is aka log format message. See BraceMessage desc about
-from sqlalchemy.orm.exc import NoResultFound
+from ccdb.path_utils import ParseRequestResult, parse_request, parse_time
+from ccdb import BraceMessage as Lfm   # lfm is aka log format message. See BraceMessage desc about
 
 log = logging.getLogger("ccdb.cmd.commands.cat")
 
@@ -33,13 +32,6 @@ class Cat(CliCommandBase):
 
     def __init__(self, context):
         CliCommandBase.__init__(self, context)
-        self.raw_entry = "/"  # object path with possible pattern, like /mole/*
-        self.path = "/"       # parent path
-        self.raw_table_path = ""
-        self.ass_id = 0
-        self.print_horizontal = True
-
-        self.request = ParseRequestResult()
 
     # ----------------------------------------
     #   process
@@ -59,7 +51,7 @@ class Cat(CliCommandBase):
 
         parsed_args = self.process_arguments(args)
 
-        if self.ass_id:
+        if parsed_args.ass_id:
             assignment = self.get_assignment_by_id(parsed_args.ass_id)
         else:
             assignment = self.get_assignment_by_request(parsed_args.request)
@@ -123,7 +115,7 @@ class Cat(CliCommandBase):
     # ----------------------------------------
     def process_arguments(self, args):
         parser = UtilityArgumentParser(add_help=False)
-        parser.add_argument("obj_name", default="")
+        parser.add_argument("obj_name", default="", nargs='?')
 
         # border
         group = parser.add_mutually_exclusive_group()
@@ -140,44 +132,49 @@ class Cat(CliCommandBase):
         group.add_argument("-c", "--comments", action="store_true", dest='show_comments', default=False)
         group.add_argument("-nc", "--no-comments", action="store_false", dest='show_comments')
 
-        # time
-        group = parser.add_mutually_exclusive_group()
-        group.add_argument("-t", "--time", action="store_true", dest='show_date', default=False)
-        group.add_argument("-nt", "--no-time", action="store_true", dest='show_date')
-
-        parser.add_argument("-d", "--directory")
-        parser.add_argument("-v", "--variation")
-        parser.add_argument("-a", "--id")
-        parser.add_argument("-r", "--run")
-        parser.add_argument("-f", "--file")
+        # horizontal or vertical
         parser.add_argument("-ph", "--horizontal", action="store_true", dest='user_request_print_horizontal')
         parser.add_argument("-pv", "--vertical", action="store_true", dest='user_request_print_vertical')
 
+        # Assignment parameters
+        parser.add_argument("-v", "--variation")
+        parser.add_argument("-a", "--id", dest='ass_id')
+        parser.add_argument("-r", "--run")
+        parser.add_argument("-t", "--time", required=False)
+
+        # Parse args
         result = parser.parse_args(args)
-        # parse loop
-        if result.obj_name:
-            # it probably must be a request or just a table name
-            result.request = parse_request(result.obj_name)
+
+        # Parse ccdb request
+        result.request = parse_request(result.obj_name) if result.obj_name else ParseRequestResult()
+
+        # Check if user set the variation
+        if not result.request.variation_is_parsed and result.variation:
+            result.request.variation = result.variation
+            result.request.variation_is_parsed = True
 
         # Check if user set the default variation
         if not result.request.variation_is_parsed and self.context.current_variation:
             result.request.variation = self.context.current_variation
             result.request.variation_is_parsed = True
 
+        # Check if user set the run
+        if not result.request.run_is_parsed and result.run:
+            result.request.run = int(result.run)
+            result.request.run_is_parsed = True
+
         # Check if user set the default run
         if not result.request.run_is_parsed and self.context.current_run:
             result.request.run = self.context.current_run
             result.request.run_is_parsed = True
 
-        return result
+        # Check if user set time
+        if not result.request.time_is_parsed and result.time:
+            result.request.time_str = result.time
+            result.request.time = parse_time(result.time)
+            result.request.time_is_parsed = True
 
-    # ----------------------------------------
-    #   validate
-    # ----------------------------------------
-    def validate(self):
-        if not self.raw_table_path:
-            return False
-        return True
+        return result
 
     # --------------------------------------------------------------------------------
     #   print_assignment_vertical
@@ -209,14 +206,14 @@ class Cat(CliCommandBase):
 
         # PRINT COMMENTS
         if comments:
-            # this lsep hack is for Windows. Where os.linesep is \r\n, but file might have \n only line seps
+            # this line sep hack is for Windows. Where os.linesep is \r\n, but file might have \n only line seps
             comment_str = assignment.comment
             if os.name == 'nt':
                 # we make sure that it is always os.linesep on windows
                 comment_str = comment_str.replace('\r\n', '\n').replace('\n', os.linesep)
 
             sharped_lines = "#" + str(comment_str).replace(os.linesep, os.linesep + "#")
-            print (sharped_lines)
+            print(sharped_lines)
 
         column_names = [column.name for column in table.columns]
         column_types = [column.type for column in table.columns]

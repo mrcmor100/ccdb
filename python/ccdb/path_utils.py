@@ -137,7 +137,7 @@ def parse_time(time_str="-1", max_time_by_default=True):
                 month = int(tmp_str)
 
                 # check for 30 day month
-                if month in [9, 4, 6, 10]:
+                if month in [4, 6, 9, 11]:
                     day = 30
                 if month == 2:
                     if year % 4 == 0 and year % 100 != 0 or year % 400 == 0:

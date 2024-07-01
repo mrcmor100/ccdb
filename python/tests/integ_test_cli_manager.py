@@ -68,17 +68,64 @@ class CliManagerTests(unittest.TestCase):
         # restore stdout
         sys.stdout = self.saved_stdout
 
+    def clear_output(self):
+        # Reset output
+        self.output.seek(0)
+        self.output.truncate()
+
     def test_context(self):
         """Test utils are loaded"""
         self.assertTrue(len(self.cli.utils) > 0)
 
     def test_cat(self):
-        """cat. General help"""
+        """cat. Return constants"""
         self.cli.process_command_line("cat /test/test_vars/test_table")
         self.assertIn("2.3", self.output.getvalue())
 
-    def test_cat_user_set_variation(self):
-        """In non-interactive mode, cat should handle path without leading / as absolute anyway"""
+    def test_cat_by_id(self):
+        """cat. Return """
+        self.cli.process_command_line("cat -a 2")
+        self.assertIn("6.0", self.output.getvalue())
+
+        self.clear_output()
+
+        # Same but full flag
+        self.cli.process_command_line("cat --id=2")
+        self.assertIn("6.0", self.output.getvalue())
+
+    def test_cat_time(self):
+        """cat. Test specifying time to get particular constants"""
+
+        # Test data has next records for test_table:
+        # /test/test_vars/test_table
+        # (ID)   (Created)              (Modified)              (variation)     (run range)      (comments)
+        #  5      2012-10-30 23-48-43    2012-10-30 23-48-43     subtest         0-inf           Test assignment for
+        #  4      2012-10-30 23-48-42    2012-10-30 23-48-42     default         0-inf           Test assignment for
+        #  2      2012-08-30 23-48-42    2012-08-30 23-48-42     test            500-3000        Test assignment for
+        #  1      2012-07-30 23-48-42    2012-07-30 23-48-42     default         0-inf           Test assignment for
+
+        # It should return assignment with --id=1
+        self.cli.process_command_line('cat -t 2012-08 /test/test_vars/test_table')
+        self.assertIn("1.11", self.output.getvalue())
+
+    def test_cat_run_variation(self):
+        """cat. If user sets ccdb -r <run> -v <variation> <command> ... it goes to context.current_run and context.current_variation.
+           They should be used as a fallback by command if no run or variation is given to command
+         """
+
+        # Test DB has a test data assignment for:
+        # variation: test
+        # runs: 500-2000
+        # it has data: 1.0|2.0|3.0|4.0|5.0|6.0
+        self.cli.context.current_variation = "default"  # <= should not be used as cat overwrites variation
+        self.cli.context.current_run = 0                # <= should not be used as cat overwrites run
+        self.cli.process_command_line("cat -v test -r 600 /test/test_vars/test_table")
+        self.assertIn("6.0", self.output.getvalue())
+
+    def test_cat_default_run_variation(self):
+        """If user sets ccdb -r <run> -v <variation> <command> ... it goes to context.current_run and context.current_variation.
+           They should be used as a fallback by command if no run or variation is given to command
+         """
 
         # Test DB has a test data assignment for:
         # variation: test
@@ -89,6 +136,19 @@ class CliManagerTests(unittest.TestCase):
         self.cli.process_command_line("cat /test/test_vars/test_table")
         self.assertIn("6.0", self.output.getvalue())
 
+    def test_cat_request_overwrite(self):
+        """cat. If user sets ccdb -r <run> -v <variation> cat <request> ... But the requests sets different run and
+           and variation, then request has the top priority
+         """
+
+        # Test DB has a test data assignment for:
+        # variation: test
+        # runs: 500-2000
+        # it has data: 1.0|2.0|3.0|4.0|5.0|6.0
+        self.cli.context.current_variation = "default"  # <= should not be used as cat overwrites variation
+        self.cli.context.current_run = 0                # <= should not be used as cat overwrites run
+        self.cli.process_command_line("cat -v default -r 0 /test/test_vars/test_table:600:test")
+        self.assertIn("6.0", self.output.getvalue())
 
     def test_cat_not_abs_path(self):
         """In non-interactive mode, cat should handle path without leading / as absolute anyway"""

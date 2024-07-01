@@ -14,6 +14,11 @@ class PathUtilsTest(unittest.TestCase):
         dt = ccdb.path_utils.parse_time("2012-11x13")   # set different symbols as separators
         self.assertEqual(dt.strftime("%Y-%m-%d_%H-%M-%S"), "2012-11-13_23-59-59")
 
+    def test_parse_year_month(self):
+        # test of simple parse
+        dt = ccdb.path_utils.parse_time("2012-11")  # set different symbols as separators
+        self.assertEqual(dt.strftime("%Y-%m-%d_%H-%M-%S"), "2012-11-30_23-59-59")
+
     def test_full_parse_request(self):
         # test full request
         result = ccdb.path_utils.parse_request("/test/test_vars/test_table:100:mc:2012-11-13_12:37:55")
