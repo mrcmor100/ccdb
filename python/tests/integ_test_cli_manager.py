@@ -82,6 +82,14 @@ class CliManagerTests(unittest.TestCase):
         self.cli.process_command_line("cat /test/test_vars/test_table")
         self.assertIn("2.3", self.output.getvalue())
 
+    def test_cat_interactive(self):
+        """cat. Return constants"""
+        # in interactive mode it should also work if the path is absolute
+        self.cli.context.is_interactive = True
+        self.cli.context.current_path = 'test/test_vars/'
+        self.cli.process_command_line("cat test_table")
+        self.assertIn("2.3", self.output.getvalue())
+
     def test_cat_by_id(self):
         """cat. Return """
         self.cli.process_command_line("cat -a 2")

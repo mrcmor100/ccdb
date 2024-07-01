@@ -1,4 +1,5 @@
 import logging
+import posixpath
 import sys
 import os
 
@@ -100,10 +101,13 @@ class Cat(CliCommandBase):
         @type request: ParseRequestResult
         """
 
+        # If we are in interactive or test mode, and path is not absolute, combine current path and provided path
+        if not request.path.startswith('/') and self.context.current_path:
+            request.path = posixpath.join(self.context.current_path, request.path)
+
         # In non-interactive mode, cat should handle path without leading / as absolute anyway
         # Check mode and if relative path is given
-        path_check_needed = not self.context.is_interactive or self.context.current_path in ["/", ""]
-        if path_check_needed and request.path_is_parsed and not request.path.startswith("/"):
+        if request.path_is_parsed and not request.path.startswith("/"):
             # PatCH the PaTH
             request.path = "/" + request.path
 
